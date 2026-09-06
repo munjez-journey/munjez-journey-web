@@ -366,6 +366,18 @@
   font-weight: 500;
 }
 
+.article-body-image {
+  display: block;
+  margin: 44px 0;
+}
+
+.article-body-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+}
+
 .article-body blockquote {
   margin: 50px 0;
   padding: 28px 34px;

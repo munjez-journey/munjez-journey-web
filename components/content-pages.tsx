@@ -6,10 +6,31 @@ export function PageIntro({ kicker, title, description }: { kicker: string; titl
   return <header className="page-intro shell"><span>{kicker}</span><h1>{title}</h1><p>{description}</p></header>;
 }
 
-export function ArticlesPage() {
+type DbArticleSummary = {
+  id: string | number;
+  title: string;
+  excerpt: string;
+  imageUrl: string | null;
+  date: string;
+};
+
+export function ArticlesPage({
+  articles = [],
+}: {
+  articles?: DbArticleSummary[];
+}) {
   return <PageFrame><PageIntro kicker="المقالات" title="أفكار تساعدك على التقدّم" description="نكتب عن الاستمرارية، تنظيم الوقت، وبناء إنجازات صغيرة يمكن رؤيتها والاحتفاء بها." />
     <section className="listing-grid shell">
       <Link className="editorial-card editorial-card-main" href="/articles/small-steps"><div className="editorial-card-image"><img src="/article-small-steps.webp" alt="طالب يبدأ طريقه عبر الكتب والخطوات الصغيرة" /></div><span>رحلة الإنجاز · 7 دقائق</span><h2>لماذا تبدأ الإنجازات الكبيرة بخطوة صغيرة؟</h2><p>كيف نصنع نظامًا يحترم طاقتنا ويقودنا بهدوء إلى ما نريد؟</p><b>اقرأ المقال <ArrowLeft size={18} /></b></Link>
+      {articles.map((article) => (
+        <Link className="editorial-card" href={`/articles/${article.id}`} key={article.id}>
+          {article.imageUrl && <div className="editorial-card-image"><img src={article.imageUrl} alt={article.title} /></div>}
+          <span>{article.date}</span>
+          <h2>{article.title}</h2>
+          <p>{article.excerpt}</p>
+          <b>اقرأ المقال <ArrowLeft size={18} /></b>
+        </Link>
+      ))}
       <article className="editorial-card"><div className="editorial-card-image"><img src="/article-consistency.webp" alt="شخص يصعد درجات ثابتة في رحلة طويلة" /></div><span>قريبًا</span><h2>الاستمرارية أقوى من الحماس</h2><p>عن بناء عادات لا تعتمد على المزاج أو البدايات المثالية.</p></article>
       <article className="editorial-card"><div className="editorial-card-image"><img src="/article-record.webp" alt="يد توثّق الإنجازات الصغيرة على لوحة" /></div><span>قريبًا</span><h2>كيف ترى إنجازك قبل أن تنساه؟</h2><p>طريقة بسيطة لتوثيق الخطوات الصغيرة والعودة إليها.</p></article>
     </section>
