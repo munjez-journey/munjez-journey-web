@@ -125,6 +125,9 @@ export default function SectionForm({
             <label htmlFor={field.name} className="text-sm text-foreground">
               {field.label}
             </label>
+            {field.type === "text" && field.hint && (
+              <p className="text-xs text-muted-foreground">{field.hint}</p>
+            )}
             <input
               id={field.name}
               type={field.type === "number" ? "number" : "text"}

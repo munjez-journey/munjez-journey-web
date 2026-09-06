@@ -5,6 +5,7 @@ export type FieldConfig =
       type: "text";
       dir?: "ltr" | "rtl";
       required?: boolean;
+      hint?: string;
     }
   | {
       name: string;
@@ -39,6 +40,12 @@ export const sections: Record<string, SectionConfig> = {
     titleField: "title",
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
+      {
+        name: "author",
+        label: "الكاتب",
+        type: "text",
+        hint: "اتركه فارغاً لاستخدام \"فريق رحلة مُنجِز\" تلقائياً.",
+      },
       {
         name: "description",
         label: "الوصف / المقدمة",

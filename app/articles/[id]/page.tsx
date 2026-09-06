@@ -17,7 +17,9 @@ export default async function DynamicArticlePage({
 
   const { data: article, error } = await supabase
     .from("articles")
-    .select("id, title, description, content, image_url, is_published, created_at")
+    .select(
+      "id, title, description, content, image_url, author, is_published, created_at"
+    )
     .eq("id", id)
     .eq("is_published", true)
     .single();
@@ -25,6 +27,10 @@ export default async function DynamicArticlePage({
   if (error || !article) {
     notFound();
   }
+
+  const wordCount = (article.content ?? "").trim().split(/\s+/).filter(Boolean).length;
+  const readingMinutes = Math.max(1, Math.round(wordCount / 200));
+  const authorName = article.author || "فريق رحلة مُنجِز";
 
   return (
     <PageFrame>
@@ -34,15 +40,19 @@ export default async function DynamicArticlePage({
         </Link>
 
         <header>
-          <span>
-            {new Date(article.created_at).toLocaleDateString("ar-EG", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </span>
+          <span>{readingMinutes} دقائق قراءة</span>
           <h1>{article.title}</h1>
           {article.description && <p>{article.description}</p>}
+          <div>
+            <b>{authorName}</b>
+            <time>
+              {new Date(article.created_at).toLocaleDateString("ar-EG", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
+          </div>
         </header>
 
         {article.image_url && (
