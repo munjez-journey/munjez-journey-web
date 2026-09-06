@@ -23,13 +23,13 @@ export default function SectionList({ section }: { section: SectionConfig }) {
     const supabase = createClient();
     const { data, error } = await supabase
       .from(section.table)
-      .select(`id, ${section.titleField}, is_published, created_at`)
+      .select<string, Row>(`id, ${section.titleField}, is_published, created_at`)
       .order("created_at", { ascending: false });
 
     if (error) {
       setError(`تعذّر تحميل بيانات "${section.label}".`);
     } else {
-      setRows((data as Row[]) ?? []);
+      setRows(data ?? []);
     }
     setLoading(false);
   }

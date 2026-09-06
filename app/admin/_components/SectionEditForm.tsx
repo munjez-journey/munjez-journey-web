@@ -23,7 +23,7 @@ export default function SectionEditForm({
 
     supabase
       .from(section.table)
-      .select(columns)
+      .select<string, Record<string, unknown>>(columns)
       .eq("id", id)
       .single()
       .then(({ data, error }) => {
@@ -32,7 +32,7 @@ export default function SectionEditForm({
           setLoading(false);
           return;
         }
-        setRecord(data as Record<string, unknown>);
+        setRecord(data);
         setLoading(false);
       });
   }, [section, id]);
