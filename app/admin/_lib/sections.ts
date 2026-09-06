@@ -40,6 +40,13 @@ export const sections: Record<string, SectionConfig> = {
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       {
+        name: "description",
+        label: "الوصف / المقدمة",
+        type: "textarea",
+        rows: 3,
+        hint: "يظهر بخط كبير تحت العنوان الرئيسي مباشرة في صفحة المقال.",
+      },
+      {
         name: "content",
         label: "المحتوى",
         type: "textarea",

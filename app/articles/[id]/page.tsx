@@ -17,7 +17,7 @@ export default async function DynamicArticlePage({
 
   const { data: article, error } = await supabase
     .from("articles")
-    .select("id, title, content, image_url, is_published, created_at")
+    .select("id, title, description, content, image_url, is_published, created_at")
     .eq("id", id)
     .eq("is_published", true)
     .single();
@@ -42,6 +42,7 @@ export default async function DynamicArticlePage({
             })}
           </span>
           <h1>{article.title}</h1>
+          {article.description && <p>{article.description}</p>}
         </header>
 
         {article.image_url && (

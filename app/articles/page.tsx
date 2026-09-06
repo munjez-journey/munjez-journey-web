@@ -24,14 +24,16 @@ function excerptFromMarkdown(content: string, maxLength = 140): string {
 export default async function Page() {
   const { data } = await supabase
     .from("articles")
-    .select("id, title, content, image_url, created_at")
+    .select("id, title, description, content, image_url, created_at")
     .eq("is_published", true)
     .order("created_at", { ascending: false });
 
   const articles = (data ?? []).map((article) => ({
     id: article.id as string | number,
     title: article.title as string,
-    excerpt: excerptFromMarkdown((article.content as string) ?? ""),
+    excerpt:
+      (article.description as string | null) ||
+      excerptFromMarkdown((article.content as string) ?? ""),
     imageUrl: article.image_url as string | null,
     date: new Date(article.created_at as string).toLocaleDateString("ar-EG", {
       year: "numeric",
