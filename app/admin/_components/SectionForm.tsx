@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { SectionConfig } from "../_lib/sections";
+import ImageUpload from "./ImageUpload";
 
 type Values = Record<string, string | boolean>;
 
@@ -115,6 +116,18 @@ export default function SectionForm({
                 value={values[field.name] as string}
                 onChange={(e) => setField(field.name, e.target.value)}
                 className="resize-y border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-foreground"
+              />
+            </div>
+          );
+        }
+
+        if (field.type === "image") {
+          return (
+            <div key={field.name} className="flex flex-col gap-1.5">
+              <label className="text-sm text-foreground">{field.label}</label>
+              <ImageUpload
+                value={values[field.name] as string}
+                onChange={(url) => setField(field.name, url)}
               />
             </div>
           );

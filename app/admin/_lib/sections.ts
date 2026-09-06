@@ -16,7 +16,8 @@ export type FieldConfig =
       hint?: string;
     }
   | { name: string; label: string; type: "number"; required?: boolean }
-  | { name: string; label: string; type: "checkbox" };
+  | { name: string; label: string; type: "checkbox" }
+  | { name: string; label: string; type: "image" };
 
 export type SectionConfig = {
   key: string;
@@ -61,7 +62,7 @@ export const sections: Record<string, SectionConfig> = {
         rows: 10,
         hint: "يدعم صيغة Markdown: ## لعنوان فرعي، **عريض** للنص العريض، > للاقتباس، واترك سطراً فارغاً بين الفقرات. تجنّب استخدام ### لأنه غير منسّق في الموقع.",
       },
-      { name: "image_url", label: "رابط الصورة", type: "text", dir: "ltr" },
+      { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر المقال؟", type: "checkbox" },
     ],
   },
@@ -83,7 +84,7 @@ export const sections: Record<string, SectionConfig> = {
         rows: 6,
       },
       { name: "audio_url", label: "رابط الصوت", type: "text", dir: "ltr" },
-      { name: "image_url", label: "رابط الصورة", type: "text", dir: "ltr" },
+      { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر الحلقة؟", type: "checkbox" },
     ],
   },
@@ -104,7 +105,7 @@ export const sections: Record<string, SectionConfig> = {
         required: true,
         rows: 10,
       },
-      { name: "image_url", label: "رابط الصورة", type: "text", dir: "ltr" },
+      { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر الخبر؟", type: "checkbox" },
     ],
   },
@@ -126,7 +127,7 @@ export const sections: Record<string, SectionConfig> = {
         rows: 6,
       },
       { name: "price", label: "السعر", type: "number", required: true },
-      { name: "image_url", label: "رابط الصورة", type: "text", dir: "ltr" },
+      { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر المنتج؟", type: "checkbox" },
     ],
   },
@@ -156,7 +157,7 @@ export const sections: Record<string, SectionConfig> = {
         required: true,
         rows: 10,
       },
-      { name: "image_url", label: "رابط الصورة", type: "text", dir: "ltr" },
+      { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر القصة؟", type: "checkbox" },
     ],
   },
