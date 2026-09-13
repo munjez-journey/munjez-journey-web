@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Archive, ArrowLeft, ArrowUpLeft, CalendarDays, CheckCircle2, Flag, Plus, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, ArrowUpLeft, CalendarDays, CheckCircle2, Pencil, Plus, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MunjezFooter } from "@/components/site-chrome";
 import { createUserClient } from "@/lib/supabase/userClient";
-import { insertTask, updateTask, deleteTask, listTasks, type CloudTask } from "@/lib/tasks/cloudStore";
+import { insertTask, updateTask, deleteTask, listTasks, type CloudTask, insertGoal, updateGoal, deleteGoal, listGoals, type CloudGoal } from "@/lib/tasks/cloudStore";
 import { migrateLocalStorageIfNeeded } from "@/lib/tasks/migrateLocalStorage";
 
 type Task = CloudTask;
@@ -190,6 +190,77 @@ export default function TaskManager() {
 
   const tasksForOffset = (offset: number) => active.filter((task) => !task.done && daysFromToday(task.date) === offset);
 
+  const [goals, setGoals] = useState<CloudGoal[]>([]);
+  const [goalsLoaded, setGoalsLoaded] = useState(false);
+  const [goalsLoading, setGoalsLoading] = useState(false);
+  const [goalsError, setGoalsError] = useState("");
+  const emptyGoalForm = { id: null as string | null, name: "", cat: "", note: "", imp: false, ach: false };
+  const [goalForm, setGoalForm] = useState(emptyGoalForm);
+  const [goalSaving, setGoalSaving] = useState(false);
+
+  const loadGoals = async () => {
+    if (!userId) return;
+    setGoalsLoading(true);
+    setGoalsError("");
+    try {
+      const supabase = createUserClient();
+      const cloudGoals = await listGoals(supabase, userId);
+      setGoals(cloudGoals);
+      setGoalsLoaded(true);
+    } catch {
+      setGoalsError("تعذّر تحميل الأهداف من الخادم.");
+    } finally {
+      setGoalsLoading(false);
+    }
+  };
+
+  const handleTabChange = (value: string) => {
+    if (value === "goals" && !goalsLoaded) loadGoals();
+  };
+
+  const startEditGoal = (goal: CloudGoal) => {
+    setGoalsError("");
+    setGoalForm({ id: goal.id, name: goal.name, cat: goal.cat, note: goal.note ?? "", imp: goal.imp, ach: goal.ach });
+  };
+
+  const resetGoalForm = () => setGoalForm(emptyGoalForm);
+
+  const submitGoalForm = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const name = goalForm.name.trim();
+    if (!name || !userId) return;
+    const payload = { name, cat: goalForm.cat.trim(), note: goalForm.note.trim() || null, imp: goalForm.imp, ach: goalForm.ach };
+    setGoalSaving(true);
+    setGoalsError("");
+    try {
+      const supabase = createUserClient();
+      if (goalForm.id) {
+        await updateGoal(supabase, goalForm.id, payload);
+        setGoals((current) => current.map((g) => g.id === goalForm.id ? { ...g, ...payload } : g));
+      } else {
+        const inserted = await insertGoal(supabase, userId, { ...payload, done: false });
+        setGoals((current) => [inserted, ...current]);
+      }
+      resetGoalForm();
+    } catch {
+      setGoalsError(goalForm.id ? "تعذّر حفظ تعديل الهدف." : "تعذّر إضافة الهدف.");
+    } finally {
+      setGoalSaving(false);
+    }
+  };
+
+  const toggleGoalDone = (goal: CloudGoal, done: boolean) => {
+    setGoals((current) => current.map((item) => item.id === goal.id ? { ...item, done } : item));
+    setGoalsError("");
+    updateGoal(createUserClient(), goal.id, { done }).catch(() => setGoalsError("تعذّر حفظ حالة الهدف."));
+  };
+
+  const removeGoal = (goal: CloudGoal) => {
+    setGoals((current) => current.filter((item) => item.id !== goal.id));
+    setGoalsError("");
+    deleteGoal(createUserClient(), goal.id).catch(() => setGoalsError("تعذّر حذف الهدف."));
+  };
+
   if (!hydrated) {
     return <main className="task-app" dir="rtl"><div className="task-shell"><p>جارٍ تحميل مهامك...</p></div></main>;
   }
@@ -208,7 +279,7 @@ export default function TaskManager() {
       <div className="task-heading"><div><span>{profileName ? `مرحبًا، ${profileName}` : "لوحتك المختصرة · التسجيل اختياري"}</span><h1>إدارة المهام</h1><p>نظرة سريعة على يومك، بينما تجد التفاصيل الكاملة داخل منصة مُنجِز.</p></div><time>{dateLabel(dateKey(0))}</time></div>
       <section className="task-stats"><article><span>مهام اليوم</span><b>{todayCount}</b></article><article><span>مكتملة</span><b>{completedCount}</b></article><article><span>متأخرة</span><b>{lateCount}</b></article><article><span>إجمالي المهام</span><b>{active.length}</b></article></section>
 
-      <Tabs defaultValue="tasks" className="task-tabs" dir="rtl">
+      <Tabs defaultValue="tasks" className="task-tabs" dir="rtl" onValueChange={handleTabChange}>
         <TabsList variant="line" className="task-tabs-list"><TabsTrigger value="tasks">المهام</TabsTrigger><TabsTrigger value="achievements">الإنجازات</TabsTrigger><TabsTrigger value="goals">الأهداف</TabsTrigger><TabsTrigger value="calendar">التقويم</TabsTrigger></TabsList>
         <TabsContent value="tasks">
           {actionError && <p className="task-status late" role="alert">{actionError}</p>}
@@ -220,7 +291,45 @@ export default function TaskManager() {
         </TabsContent>
 
         <TabsContent value="achievements"><section className="task-cards-grid"><article><CheckCircle2 /><span>هذا الأسبوع</span><h2>أكملت {completedCount} مهام</h2><p>كل خطوة مكتملة تُضاف إلى سجل تقدّمك.</p></article><article><CheckCircle2 /><span>إنجاز جديد</span><h2>إكمال مراجعة الوحدة الأولى</h2><p>جلسة مركزة لمدة خمس وأربعين دقيقة.</p></article><article><CheckCircle2 /><span>الاستمرارية</span><h2>3 جلسات قراءة</h2><p>ساعة وخمس وأربعون دقيقة من القراءة المركزة.</p></article></section></TabsContent>
-        <TabsContent value="goals"><section className="goals-list"><article><div><Flag /><span>الدراسة</span><h2>إنهاء الفصل الأول من البحث</h2></div><b>65%</b><div className="goal-progress"><i style={{ width: "65%" }} /></div></article><article><div><Flag /><span>العادات</span><h2>12 جلسة قراءة هذا الشهر</h2></div><b>8 من 12</b><div className="goal-progress"><i style={{ width: "67%" }} /></div></article><article><div><Flag /><span>الصحة</span><h2>المشي أربع مرات أسبوعيًا</h2></div><b>3 من 4</b><div className="goal-progress"><i style={{ width: "75%" }} /></div></article></section></TabsContent>
+        <TabsContent value="goals">
+          {goalsError && <p className="task-status late" role="alert">{goalsError}</p>}
+          <form className="goal-form" onSubmit={submitGoalForm}>
+            <div className="goal-form-row">
+              <input value={goalForm.name} onChange={(event) => setGoalForm((f) => ({ ...f, name: event.target.value }))} placeholder="اسم الهدف" aria-label="اسم الهدف" required />
+              <input value={goalForm.cat} onChange={(event) => setGoalForm((f) => ({ ...f, cat: event.target.value }))} placeholder="التصنيف (مثل: تعليم، صحة)" aria-label="تصنيف الهدف" />
+            </div>
+            <div className="goal-form-row">
+              <input value={goalForm.note} onChange={(event) => setGoalForm((f) => ({ ...f, note: event.target.value }))} placeholder="ملاحظة (اختياري)" aria-label="ملاحظة الهدف" />
+            </div>
+            <div className="goal-form-row goal-form-checks">
+              <label><input type="checkbox" checked={goalForm.imp} onChange={(event) => setGoalForm((f) => ({ ...f, imp: event.target.checked }))} /> هدف مهم</label>
+              <label><input type="checkbox" checked={goalForm.ach} onChange={(event) => setGoalForm((f) => ({ ...f, ach: event.target.checked }))} /> يُحتسب كإنجاز عند إتمامه</label>
+            </div>
+            <div className="goal-form-actions">
+              <button type="submit" disabled={goalSaving}>{goalSaving ? "جارٍ الحفظ..." : goalForm.id ? "حفظ التعديل" : "إضافة هدف"}</button>
+              {goalForm.id && <button type="button" onClick={resetGoalForm}>إلغاء</button>}
+            </div>
+          </form>
+
+          <section className="task-panel">
+            <div className="panel-title"><div><h2>أهدافك</h2><span>{goals.length} أهداف</span></div></div>
+            <div className="task-list">
+              {goalsLoading && <p style={{ padding: "20px" }}>جارٍ تحميل الأهداف...</p>}
+              {!goalsLoading && goals.length === 0 && <p style={{ padding: "20px" }}>لا توجد أهداف بعد. أضف أول هدف من الأعلى.</p>}
+              {!goalsLoading && goals.map((goal) => (
+                <article className={goal.done ? "is-complete" : ""} key={goal.id}>
+                  <Checkbox checked={goal.done} onCheckedChange={(checked) => toggleGoalDone(goal, Boolean(checked))} aria-label={`إكمال هدف ${goal.name}`} />
+                  <div className="task-name"><strong>{goal.name}</strong><span>{goal.cat || "بدون تصنيف"}{goal.note ? ` · ${goal.note}` : ""}</span></div>
+                  <span className={`task-status ${goal.imp ? "late" : "upcoming"}`}>{goal.imp ? "مهم" : "عادي"}</span>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button className="task-delete" onClick={() => startEditGoal(goal)} aria-label={`تعديل ${goal.name}`}><Pencil size={16} /></button>
+                    <button className="task-delete" onClick={() => removeGoal(goal)} aria-label={`حذف ${goal.name}`}><Trash2 size={16} /></button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        </TabsContent>
         <TabsContent value="calendar"><section className="calendar-view"><div className="calendar-day is-today"><b>اليوم</b><strong>{dateLabel(dateKey(0))}</strong>{tasksForOffset(0).map((task) => <span key={task.id}>{task.name}</span>)}</div><div className="calendar-day"><b>غدًا</b><strong>{dateLabel(dateKey(1))}</strong>{tasksForOffset(1).map((task) => <span key={task.id}>{task.name}</span>)}</div><div className="calendar-day"><b>قادم</b><strong>{dateLabel(dateKey(4))}</strong>{tasksForOffset(4).map((task) => <span key={task.id}>{task.name}</span>)}</div><CalendarDays size={28} /></section></TabsContent>
       </Tabs>
 
