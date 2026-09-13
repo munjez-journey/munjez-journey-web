@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Archive, ArrowLeft, ArrowUpLeft, CalendarDays, CheckCircle2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, ArrowLeft, ArrowUpLeft, CalendarDays, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MunjezFooter } from "@/components/site-chrome";
@@ -70,6 +70,17 @@ function daysFromToday(value: string) {
 function timeLabel(time: string) {
   return time ? new Intl.DateTimeFormat("ar-SA", { hour: "numeric", minute: "2-digit" }).format(new Date(`2026-01-01T${time}:00`)) : "";
 }
+
+// نفس تصنيفات وألوان تبويب الأهداف في public/munjez-platform.html
+const GOAL_CATEGORIES = ["ترفيه", "رياضة", "تعليم", "صحة", "عمل", "شخصي", "أخرى"];
+const GOAL_CAT_CLASS: Record<string, string> = {
+  "ترفيه": "gc-fun",
+  "رياضة": "gc-sport",
+  "تعليم": "gc-edu",
+  "صحة": "gc-health",
+  "عمل": "gc-work",
+  "شخصي": "gc-per",
+};
 
 function statusFor(task: Task) {
   if (task.done) return { label: "مكتملة", tone: "done" };
@@ -194,8 +205,11 @@ export default function TaskManager() {
   const [goalsLoaded, setGoalsLoaded] = useState(false);
   const [goalsLoading, setGoalsLoading] = useState(false);
   const [goalsError, setGoalsError] = useState("");
-  const emptyGoalForm = { id: null as string | null, name: "", cat: "", note: "", imp: false, ach: false };
+  const [goalFilterTab, setGoalFilterTab] = useState<"all" | "done">("all");
+  const [goalFilterCat, setGoalFilterCat] = useState("all");
+  const emptyGoalForm = { id: null as string | null, name: "", cat: GOAL_CATEGORIES[0], note: "", imp: false, ach: false };
   const [goalForm, setGoalForm] = useState(emptyGoalForm);
+  const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [goalSaving, setGoalSaving] = useState(false);
 
   const loadGoals = async () => {
@@ -218,18 +232,32 @@ export default function TaskManager() {
     if (value === "goals" && !goalsLoaded) loadGoals();
   };
 
+  const filteredGoals = goals
+    .filter((goal) => goalFilterTab !== "done" || goal.done)
+    .filter((goal) => goalFilterCat === "all" || goal.cat === goalFilterCat);
+
+  const openAddGoalModal = () => {
+    setGoalsError("");
+    setGoalForm(emptyGoalForm);
+    setGoalModalOpen(true);
+  };
+
   const startEditGoal = (goal: CloudGoal) => {
     setGoalsError("");
     setGoalForm({ id: goal.id, name: goal.name, cat: goal.cat, note: goal.note ?? "", imp: goal.imp, ach: goal.ach });
+    setGoalModalOpen(true);
   };
 
-  const resetGoalForm = () => setGoalForm(emptyGoalForm);
+  const closeGoalModal = () => {
+    setGoalModalOpen(false);
+    setGoalForm(emptyGoalForm);
+  };
 
   const submitGoalForm = async (event: React.FormEvent) => {
     event.preventDefault();
     const name = goalForm.name.trim();
     if (!name || !userId) return;
-    const payload = { name, cat: goalForm.cat.trim(), note: goalForm.note.trim() || null, imp: goalForm.imp, ach: goalForm.ach };
+    const payload = { name, cat: goalForm.cat, note: goalForm.note.trim() || null, imp: goalForm.imp, ach: goalForm.ach };
     setGoalSaving(true);
     setGoalsError("");
     try {
@@ -241,7 +269,7 @@ export default function TaskManager() {
         const inserted = await insertGoal(supabase, userId, { ...payload, done: false });
         setGoals((current) => [inserted, ...current]);
       }
-      resetGoalForm();
+      closeGoalModal();
     } catch {
       setGoalsError(goalForm.id ? "تعذّر حفظ تعديل الهدف." : "تعذّر إضافة الهدف.");
     } finally {
@@ -292,43 +320,97 @@ export default function TaskManager() {
 
         <TabsContent value="achievements"><section className="task-cards-grid"><article><CheckCircle2 /><span>هذا الأسبوع</span><h2>أكملت {completedCount} مهام</h2><p>كل خطوة مكتملة تُضاف إلى سجل تقدّمك.</p></article><article><CheckCircle2 /><span>إنجاز جديد</span><h2>إكمال مراجعة الوحدة الأولى</h2><p>جلسة مركزة لمدة خمس وأربعين دقيقة.</p></article><article><CheckCircle2 /><span>الاستمرارية</span><h2>3 جلسات قراءة</h2><p>ساعة وخمس وأربعون دقيقة من القراءة المركزة.</p></article></section></TabsContent>
         <TabsContent value="goals">
-          {goalsError && <p className="task-status late" role="alert">{goalsError}</p>}
-          <form className="goal-form" onSubmit={submitGoalForm}>
-            <div className="goal-form-row">
-              <input value={goalForm.name} onChange={(event) => setGoalForm((f) => ({ ...f, name: event.target.value }))} placeholder="اسم الهدف" aria-label="اسم الهدف" required />
-              <input value={goalForm.cat} onChange={(event) => setGoalForm((f) => ({ ...f, cat: event.target.value }))} placeholder="التصنيف (مثل: تعليم، صحة)" aria-label="تصنيف الهدف" />
-            </div>
-            <div className="goal-form-row">
-              <input value={goalForm.note} onChange={(event) => setGoalForm((f) => ({ ...f, note: event.target.value }))} placeholder="ملاحظة (اختياري)" aria-label="ملاحظة الهدف" />
-            </div>
-            <div className="goal-form-row goal-form-checks">
-              <label><input type="checkbox" checked={goalForm.imp} onChange={(event) => setGoalForm((f) => ({ ...f, imp: event.target.checked }))} /> هدف مهم</label>
-              <label><input type="checkbox" checked={goalForm.ach} onChange={(event) => setGoalForm((f) => ({ ...f, ach: event.target.checked }))} /> يُحتسب كإنجاز عند إتمامه</label>
-            </div>
-            <div className="goal-form-actions">
-              <button type="submit" disabled={goalSaving}>{goalSaving ? "جارٍ الحفظ..." : goalForm.id ? "حفظ التعديل" : "إضافة هدف"}</button>
-              {goalForm.id && <button type="button" onClick={resetGoalForm}>إلغاء</button>}
-            </div>
-          </form>
+          {goalsError && !goalModalOpen && <p className="task-status late" role="alert">{goalsError}</p>}
 
-          <section className="task-panel">
-            <div className="panel-title"><div><h2>أهدافك</h2><span>{goals.length} أهداف</span></div></div>
-            <div className="task-list">
-              {goalsLoading && <p style={{ padding: "20px" }}>جارٍ تحميل الأهداف...</p>}
-              {!goalsLoading && goals.length === 0 && <p style={{ padding: "20px" }}>لا توجد أهداف بعد. أضف أول هدف من الأعلى.</p>}
-              {!goalsLoading && goals.map((goal) => (
-                <article className={goal.done ? "is-complete" : ""} key={goal.id}>
-                  <Checkbox checked={goal.done} onCheckedChange={(checked) => toggleGoalDone(goal, Boolean(checked))} aria-label={`إكمال هدف ${goal.name}`} />
-                  <div className="task-name"><strong>{goal.name}</strong><span>{goal.cat || "بدون تصنيف"}{goal.note ? ` · ${goal.note}` : ""}</span></div>
-                  <span className={`task-status ${goal.imp ? "late" : "upcoming"}`}>{goal.imp ? "مهم" : "عادي"}</span>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button className="task-delete" onClick={() => startEditGoal(goal)} aria-label={`تعديل ${goal.name}`}><Pencil size={16} /></button>
-                    <button className="task-delete" onClick={() => removeGoal(goal)} aria-label={`حذف ${goal.name}`}><Trash2 size={16} /></button>
-                  </div>
-                </article>
+          <div className="goals-toolbar">
+            <div className="ftabs">
+              <button type="button" className={`ftab${goalFilterTab === "all" ? " active" : ""}`} onClick={() => setGoalFilterTab("all")}>الكل</button>
+              <button type="button" className={`ftab${goalFilterTab === "done" ? " active" : ""}`} onClick={() => setGoalFilterTab("done")}>مكتمل</button>
+            </div>
+            <div className="cf-wrap">
+              <button type="button" className={`cf${goalFilterCat === "all" ? " on" : ""}`} onClick={() => setGoalFilterCat("all")}>الكل</button>
+              {GOAL_CATEGORIES.map((cat) => (
+                <button type="button" key={cat} className={`cf${goalFilterCat === cat ? " on" : ""}`} onClick={() => setGoalFilterCat(cat)}>{cat}</button>
               ))}
             </div>
-          </section>
+            <div className="sp" />
+            <button type="button" className="badd-ah" onClick={openAddGoalModal}><Plus size={13} /> هدف جديد</button>
+          </div>
+
+          {goalsLoading && <p style={{ padding: "20px" }}>جارٍ تحميل الأهداف...</p>}
+          {!goalsLoading && (
+            <div className="goals-cloud-list">
+              {filteredGoals.length === 0 && <div className="goals-empty">لا توجد أهداف في هذا القسم</div>}
+              {filteredGoals.map((goal) => (
+                <div className={`gcard${goal.done ? " done-g" : ""}`} key={goal.id}>
+                  <button
+                    type="button"
+                    className={`g-check${goal.done ? " on" : ""}`}
+                    onClick={() => toggleGoalDone(goal, !goal.done)}
+                    aria-label={`إكمال هدف ${goal.name}`}
+                  />
+                  <div className="g-body">
+                    <div className="g-name">{goal.name}</div>
+                    <div className="g-badges">
+                      <span className={`g-cat ${GOAL_CAT_CLASS[goal.cat] ?? "gc-other"}`}>{goal.cat}</span>
+                      {goal.imp && <span className="g-imp">مهم</span>}
+                      {goal.ach && <span className="g-ach-badge">ينتقل للإنجازات</span>}
+                    </div>
+                    {goal.note && <div className="g-notes">{goal.note}</div>}
+                  </div>
+                  <div className="g-acts">
+                    <button type="button" className="gact" onClick={() => startEditGoal(goal)}>تعديل</button>
+                    <button type="button" className="gact del" onClick={() => removeGoal(goal)} aria-label={`حذف ${goal.name}`}>×</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {goalModalOpen && (
+            <div className="moverlay" onClick={(event) => { if (event.target === event.currentTarget) closeGoalModal(); }}>
+              <div className="gmodal">
+                <div className="mtitle">
+                  <span>{goalForm.id ? "تعديل الهدف" : "هدف جديد"}</span>
+                  <button type="button" className="mclose" onClick={closeGoalModal} aria-label="إغلاق">×</button>
+                </div>
+                <form onSubmit={submitGoalForm}>
+                  <div className="mrow">
+                    <span className="mlbl">الهدف *</span>
+                    <input className="minp" value={goalForm.name} onChange={(event) => setGoalForm((f) => ({ ...f, name: event.target.value }))} placeholder="مثال: إنهاء فصل من كتاب..." required />
+                  </div>
+                  <div className="mrow">
+                    <span className="mlbl">الفئة</span>
+                    <div className="gcp">
+                      {GOAL_CATEGORIES.map((cat) => (
+                        <div key={cat} className={`gcpo${goalForm.cat === cat ? " sel" : ""}`} onClick={() => setGoalForm((f) => ({ ...f, cat }))}>{cat}</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mrow">
+                    <span className="mlbl">الأهمية</span>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <div className={`gcpo${goalForm.imp ? " sel" : ""}`} onClick={() => setGoalForm((f) => ({ ...f, imp: true }))}>مهم</div>
+                      <div className={`gcpo${!goalForm.imp ? " sel" : ""}`} onClick={() => setGoalForm((f) => ({ ...f, imp: false }))}>غير مهم</div>
+                    </div>
+                  </div>
+                  <div className="mrow">
+                    <span className="mlbl">ملاحظات (اختياري)</span>
+                    <textarea className="minp" rows={2} style={{ resize: "none" }} value={goalForm.note} onChange={(event) => setGoalForm((f) => ({ ...f, note: event.target.value }))} />
+                  </div>
+                  <div className="ach-opt">
+                    <input type="checkbox" id="gm-ach" checked={goalForm.ach} onChange={(event) => setGoalForm((f) => ({ ...f, ach: event.target.checked }))} />
+                    <label htmlFor="gm-ach">يُحتسب كإنجاز عند إتمامه</label>
+                  </div>
+                  {goalsError && <p className="task-status late" style={{ marginTop: 10 }} role="alert">{goalsError}</p>}
+                  <div className="mfooter">
+                    <button type="button" className="mbtn cancel" onClick={closeGoalModal}>إلغاء</button>
+                    <button type="submit" className="mbtn ok" disabled={goalSaving}>{goalSaving ? "جارٍ الحفظ..." : "حفظ"}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="calendar"><section className="calendar-view"><div className="calendar-day is-today"><b>اليوم</b><strong>{dateLabel(dateKey(0))}</strong>{tasksForOffset(0).map((task) => <span key={task.id}>{task.name}</span>)}</div><div className="calendar-day"><b>غدًا</b><strong>{dateLabel(dateKey(1))}</strong>{tasksForOffset(1).map((task) => <span key={task.id}>{task.name}</span>)}</div><div className="calendar-day"><b>قادم</b><strong>{dateLabel(dateKey(4))}</strong>{tasksForOffset(4).map((task) => <span key={task.id}>{task.name}</span>)}</div><CalendarDays size={28} /></section></TabsContent>
       </Tabs>
