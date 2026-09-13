@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 import TasksTab from "./TasksTab";
+import GoalsTab from "./GoalsTab";
 
 type PageId = "home" | "tasks" | "achieve" | "goals" | "cal";
 
@@ -15,7 +16,7 @@ const NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "cal", label: "التقويم" },
 ];
 
-const PLACEHOLDER_COPY: Record<Exclude<PageId, "tasks">, { title: string; body: string }> = {
+const PLACEHOLDER_COPY: Record<Exclude<PageId, "tasks" | "goals">, { title: string; body: string }> = {
   home: {
     title: "الرئيسية",
     body: "لوحة النظرة العامة (الإحصائيات، التقدّم الشهري والسنوي) قادمة في دفعة لاحقة.",
@@ -23,10 +24,6 @@ const PLACEHOLDER_COPY: Record<Exclude<PageId, "tasks">, { title: string; body: 
   achieve: {
     title: "الإنجازات",
     body: "سجل الإنجازات الكامل قادم في دفعة لاحقة.",
-  },
-  goals: {
-    title: "الأهداف",
-    body: "تبويب الأهداف الكامل قادم في دفعة لاحقة.",
   },
   cal: {
     title: "التقويم",
@@ -73,6 +70,8 @@ export default function PlatformShell({
       <div className="pf-wrap">
         {activePage === "tasks" ? (
           <TasksTab userId={user.id} />
+        ) : activePage === "goals" ? (
+          <GoalsTab userId={user.id} />
         ) : (
           <div className="pf-page-placeholder">
             <h2>{PLACEHOLDER_COPY[activePage].title}</h2>

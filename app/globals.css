@@ -3099,6 +3099,9 @@ a {
 .pf-app .minp { border-radius: 6px; }
 .pf-app .mbtn { border-radius: 6px; }
 .pf-app .ftabs { border-radius: 6px; }
+.pf-app .gcard { border-radius: 10px; }
+.pf-app .badd-ah { border-radius: 6px; }
+.pf-app .goals-empty { border-radius: 10px; }
 
 .pf-topbar {
   display: flex;
