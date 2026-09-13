@@ -3079,3 +3079,433 @@ a {
   .news-list-image { grid-row: 1; }
   .news-list time { grid-row: 2; }
 }
+
+/* =========================================================
+   منصة مُنجِز الكاملة (/platform) — منقولة من public/munjez-platform.html
+   نفس البنية والألوان الوظيفية، مع استبدال اللون المخصّص بالأسود
+   والزوايا الحادة بدل الدائرية لمطابقة هوية الموقع.
+   ========================================================= */
+
+.pf-app {
+  min-height: 100vh;
+  background: #f7f7f5;
+  font-size: 13px;
+}
+
+.pf-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid #d9d9d5;
+  flex-wrap: wrap;
+}
+
+.pf-nav-logo {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.pf-nav-logo img {
+  height: 32px;
+  width: auto;
+}
+
+.pf-nav-links {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.nb {
+  background: none;
+  border: 0;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #42423e;
+  white-space: nowrap;
+}
+
+.nb:hover {
+  background: #ecece8;
+}
+
+.nb.active {
+  background: #10100f;
+  color: #fff;
+}
+
+.pf-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.mini-link {
+  height: 31px;
+  padding: 0 12px;
+  background: #ecece8;
+  color: #10100f;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid #d9d9d5;
+}
+
+.pf-signout {
+  height: 31px;
+  padding: 0 12px;
+  background: none;
+  border: 1px solid #d9d9d5;
+  color: #42423e;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+}
+
+.pf-signout:hover {
+  background: #ecece8;
+}
+
+.pf-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 20px 60px;
+}
+
+.pf-page-placeholder {
+  border: 1px solid #d9d9d5;
+  background: #fff;
+  padding: 60px 24px;
+  text-align: center;
+  color: #777772;
+}
+
+.pf-page-placeholder h2 {
+  color: #10100f;
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+
+/* ملخص إحصائيات المهام */
+.t-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tsc {
+  background: #fff;
+  border: 1px solid #d9d9d5;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.tsc.td-c { border-top: 3px solid #2563eb; }
+.tsc.ov-c { border-top: 3px solid #a43225; }
+.tsc.dn-c { border-top: 3px solid #16a34a; }
+.tsc.tot-c { border-top: 3px solid #d9d9d5; }
+
+.tsc-num {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.tsc-lbl {
+  font-size: 0.68rem;
+  color: #777772;
+  margin-top: 2px;
+}
+
+/* صندوق إضافة مهمة */
+.add-box {
+  background: #fff;
+  border: 1px solid #d9d9d5;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.add-lbl {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #777772;
+  letter-spacing: 0.4px;
+  margin-bottom: 9px;
+}
+
+.add-main {
+  display: grid;
+  grid-template-columns: 1fr 140px auto;
+  gap: 6px;
+  margin-bottom: 7px;
+  align-items: end;
+}
+
+.add-extra {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  align-items: end;
+}
+
+.fl {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.fl label {
+  font-size: 0.68rem;
+  color: #777772;
+}
+
+.inp {
+  background: #f7f7f5;
+  border: 1px solid #d9d9d5;
+  padding: 6px 9px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: #10100f;
+  width: 100%;
+  outline: 0;
+  height: 32px;
+}
+
+.inp:focus {
+  border-color: #10100f;
+}
+
+.badd {
+  background: #10100f;
+  color: #fff;
+  border: 0;
+  height: 32px;
+  padding: 0 16px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.badd:hover {
+  opacity: 0.85;
+}
+
+/* شريط أدوات وفلاتر المهام */
+.tbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+  flex-wrap: wrap;
+}
+
+.tbar .sp {
+  flex: 1;
+}
+
+.sinp {
+  background: #f7f7f5;
+  border: 1px solid #d9d9d5;
+  padding: 5px 9px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: #10100f;
+  outline: 0;
+  width: 150px;
+}
+
+.sinp:focus {
+  border-color: #10100f;
+}
+
+/* جدول المهام المجدولة */
+.twrap {
+  border: 1px solid #d9d9d5;
+  overflow: hidden;
+}
+
+.pf-app table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pf-app thead {
+  background: #ecece8;
+}
+
+.pf-app th {
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 0.68rem;
+  color: #777772;
+  font-weight: 500;
+  border-bottom: 1px solid #d9d9d5;
+  white-space: nowrap;
+}
+
+.pf-app td {
+  padding: 9px 6px;
+  border-bottom: 1px solid #e5e5e1;
+  font-size: 0.78rem;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.pf-app td.td-name {
+  text-align: right;
+}
+
+.pf-app tr:last-child td {
+  border-bottom: 0;
+}
+
+.pf-app tr.rh:hover td {
+  filter: brightness(0.97);
+}
+
+.pf-app tr.r-done td { background: #e8f3e7; }
+.pf-app tr.r-done .tn { text-decoration: line-through; color: #777772; }
+.pf-app tr.r-today td { background: #eef4ff; }
+.pf-app tr.r-ov td { background: #fae8e5; }
+.pf-app tr.r-archived td { opacity: 0.76; }
+
+.tn {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.td-acts .abtn {
+  display: inline-block;
+}
+
+.spill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.62rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.s-td { background: rgba(37, 99, 235, 0.14); color: #1d4ed8; }
+.s-up { background: #ecece8; color: #777772; }
+.s-ov { background: rgba(164, 50, 37, 0.12); color: #a43225; }
+.s-dn { background: rgba(22, 163, 74, 0.12); color: #15803d; }
+.s-ar { background: #ecece8; color: #42423e; }
+
+.sdot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.achk {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid #b9b9b3;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.achk.on {
+  background: #10100f;
+  border-color: #10100f;
+}
+
+.achk.on::after {
+  content: "✓";
+  font-size: 10px;
+  color: #fff;
+  line-height: 1;
+}
+
+.abtn {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 3px 6px;
+  font-size: 0.72rem;
+  color: #777772;
+  font-family: inherit;
+}
+
+.abtn:hover {
+  background: #ecece8;
+  color: #10100f;
+}
+
+.abtn.del:hover {
+  background: #fae8e5;
+  color: #a43225;
+}
+
+.abtn.archive {
+  color: #10100f;
+}
+
+.abtn.archive:hover {
+  background: #ecece8;
+}
+
+.emptyrow td {
+  text-align: center;
+  padding: 32px;
+  color: #777772;
+  font-size: 0.78rem;
+}
+
+/* قائمة المهام بدون تاريخ */
+.bl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bl-item {
+  background: #fff;
+  border: 1px solid #d9d9d5;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.bl-item.done {
+  background: #e8f3e7;
+}
+
+.bl-item.done .bl-name {
+  text-decoration: line-through;
+  color: #777772;
+}
+
+.bl-name {
+  flex: 1;
+  font-size: 0.78rem;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
