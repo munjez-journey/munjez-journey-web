@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createUserClient } from "@/lib/supabase/userClient";
 import { listTasks, insertTask, updateTask, deleteTask, type CloudTask } from "@/lib/tasks/cloudStore";
+import TimePicker from "./TimePicker";
 
 const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 const MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
@@ -233,8 +234,8 @@ export default function TasksTab({ userId }: { userId: string }) {
           <button className="badd" type="submit" disabled={adding}>{adding ? "جارٍ الإضافة..." : "إضافة"}</button>
         </div>
         <div className="add-extra">
-          <div className="fl"><label>من (اختياري)</label><input className="inp" type="time" value={form.from} onChange={(e) => setForm((f) => ({ ...f, from: e.target.value }))} /></div>
-          <div className="fl"><label>إلى (اختياري)</label><input className="inp" type="time" value={form.to} onChange={(e) => setForm((f) => ({ ...f, to: e.target.value }))} /></div>
+          <div className="fl"><label>من (اختياري)</label><TimePicker value={form.from} onChange={(v) => setForm((f) => ({ ...f, from: v }))} /></div>
+          <div className="fl"><label>إلى (اختياري)</label><TimePicker value={form.to} onChange={(v) => setForm((f) => ({ ...f, to: v }))} /></div>
           <div className="fl" style={{ justifyContent: "flex-end" }}>
             <div className="ach-opt" style={{ marginTop: "auto" }}>
               <input type="checkbox" id="f-ach" checked={form.achieve} onChange={(e) => setForm((f) => ({ ...f, achieve: e.target.checked }))} />
@@ -344,8 +345,8 @@ export default function TasksTab({ userId }: { userId: string }) {
               <div className="mrow"><span className="mlbl">المهمة *</span><input className="minp" value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} required /></div>
               <div className="mrow"><span className="mlbl">التاريخ (اختياري)</span><input className="minp" type="date" value={editForm.date} onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))} /></div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
-                <div className="mrow"><span className="mlbl">من</span><input className="minp" type="time" value={editForm.from} onChange={(e) => setEditForm((f) => ({ ...f, from: e.target.value }))} /></div>
-                <div className="mrow"><span className="mlbl">إلى</span><input className="minp" type="time" value={editForm.to} onChange={(e) => setEditForm((f) => ({ ...f, to: e.target.value }))} /></div>
+                <div className="mrow"><span className="mlbl">من</span><TimePicker value={editForm.from} onChange={(v) => setEditForm((f) => ({ ...f, from: v }))} /></div>
+                <div className="mrow"><span className="mlbl">إلى</span><TimePicker value={editForm.to} onChange={(v) => setEditForm((f) => ({ ...f, to: v }))} /></div>
               </div>
               <div className="ach-opt">
                 <input type="checkbox" id="et-ach" checked={editForm.achieve} onChange={(e) => setEditForm((f) => ({ ...f, achieve: e.target.checked }))} />

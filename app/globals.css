@@ -3092,6 +3092,14 @@ a {
   font-size: 13px;
 }
 
+/* الزوايا هنا مدوّرة لتطابق public/munjez-platform.html، بعكس /tasks الذي
+   يستخدم نفس الكلاسات (gmodal/minp/mbtn/ftabs) بزوايا حادة عمداً — لذلك
+   التدوير محصور بهذا النطاق (.pf-app) فقط ولا يمسّ الكلاسات الأصلية. */
+.pf-app .gmodal { border-radius: 14px; }
+.pf-app .minp { border-radius: 6px; }
+.pf-app .mbtn { border-radius: 6px; }
+.pf-app .ftabs { border-radius: 6px; }
+
 .pf-topbar {
   display: flex;
   align-items: center;
@@ -3125,6 +3133,7 @@ a {
 .nb {
   background: none;
   border: 0;
+  border-radius: 6px;
   padding: 7px 14px;
   cursor: pointer;
   font-family: inherit;
@@ -3160,6 +3169,7 @@ a {
   font-weight: 500;
   white-space: nowrap;
   border: 1px solid #d9d9d5;
+  border-radius: 6px;
 }
 
 .pf-signout {
@@ -3167,6 +3177,7 @@ a {
   padding: 0 12px;
   background: none;
   border: 1px solid #d9d9d5;
+  border-radius: 6px;
   color: #42423e;
   cursor: pointer;
   font-family: inherit;
@@ -3185,6 +3196,7 @@ a {
 
 .pf-page-placeholder {
   border: 1px solid #d9d9d5;
+  border-radius: 10px;
   background: #fff;
   padding: 60px 24px;
   text-align: center;
@@ -3208,6 +3220,7 @@ a {
 .tsc {
   background: #fff;
   border: 1px solid #d9d9d5;
+  border-radius: 10px;
   padding: 10px 12px;
   text-align: center;
 }
@@ -3233,6 +3246,7 @@ a {
 .add-box {
   background: #fff;
   border: 1px solid #d9d9d5;
+  border-radius: 10px;
   padding: 12px;
   margin-bottom: 14px;
 }
@@ -3275,6 +3289,7 @@ a {
 .inp {
   background: #f7f7f5;
   border: 1px solid #d9d9d5;
+  border-radius: 6px;
   padding: 6px 9px;
   font-family: inherit;
   font-size: 0.78rem;
@@ -3292,6 +3307,7 @@ a {
   background: #10100f;
   color: #fff;
   border: 0;
+  border-radius: 6px;
   height: 32px;
   padding: 0 16px;
   cursor: pointer;
@@ -3320,6 +3336,7 @@ a {
 .sinp {
   background: #f7f7f5;
   border: 1px solid #d9d9d5;
+  border-radius: 6px;
   padding: 5px 9px;
   font-family: inherit;
   font-size: 0.78rem;
@@ -3335,6 +3352,7 @@ a {
 /* جدول المهام المجدولة */
 .twrap {
   border: 1px solid #d9d9d5;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -3422,7 +3440,7 @@ a {
 .achk {
   width: 16px;
   height: 16px;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1.5px solid #b9b9b3;
   cursor: pointer;
   display: inline-flex;
@@ -3446,6 +3464,7 @@ a {
 .abtn {
   background: none;
   border: 0;
+  border-radius: 6px;
   cursor: pointer;
   padding: 3px 6px;
   font-size: 0.72rem;
@@ -3488,6 +3507,7 @@ a {
 .bl-item {
   background: #fff;
   border: 1px solid #d9d9d5;
+  border-radius: 6px;
   padding: 9px 12px;
   display: flex;
   align-items: center;
@@ -3508,4 +3528,75 @@ a {
   font-size: 0.78rem;
   text-align: right;
   overflow-wrap: anywhere;
+}
+
+/* أداة اختيار الوقت (ساعة/دقيقة/AM-PM) — منقولة من public/munjez-platform.html */
+.tp-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  direction: ltr;
+}
+
+.tp-sel {
+  background: #f7f7f5;
+  border: 1px solid #d9d9d5;
+  border-radius: 6px;
+  padding: 2px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: #10100f;
+  outline: 0;
+  cursor: pointer;
+  height: 32px;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-sel:focus {
+  border-color: #10100f;
+}
+
+.tp-sep {
+  font-size: 0.82rem;
+  color: #42423e;
+  font-weight: 500;
+  flex-shrink: 0;
+  padding: 0 1px;
+}
+
+.tp-clr {
+  background: none;
+  border: 1px solid #d9d9d5;
+  border-radius: 6px;
+  color: #777772;
+  cursor: pointer;
+  width: 24px;
+  height: 32px;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.tp-clr:hover {
+  background: #fae8e5;
+  color: #a43225;
+}
+
+.tp-empty {
+  background: #f7f7f5;
+  border: 1px dashed #b9b9b3;
+  border-radius: 6px;
+  height: 32px;
+  padding: 0 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  color: #777772;
+  white-space: nowrap;
+}
+
+.tp-empty:hover {
+  border-color: #10100f;
+  color: #10100f;
 }
