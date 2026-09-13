@@ -6,8 +6,11 @@ import { Archive, ArrowLeft, ArrowUpLeft, CalendarDays, CheckCircle2, Flag, Plus
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MunjezFooter } from "@/components/site-chrome";
+import { createUserClient } from "@/lib/supabase/userClient";
+import { insertTask, updateTask, deleteTask, listTasks, type CloudTask } from "@/lib/tasks/cloudStore";
+import { migrateLocalStorageIfNeeded } from "@/lib/tasks/migrateLocalStorage";
 
-type Task = { id: number; name: string; date: string; from: string; to: string; achieve: boolean; done: boolean; archived: boolean };
+type Task = CloudTask;
 const DEMO_DATA_VERSION = 5;
 
 function dateKey(offset = 0) {
@@ -17,7 +20,11 @@ function dateKey(offset = 0) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function defaultTasks(): Task[] {
+// شكل محلي فقط (id رقمي) يُستخدم حصراً لتوليد بيانات العرض الأولى في
+// localStorage قبل الترحيل إلى Supabase؛ لا علاقة له بنوع Task السحابي.
+type LocalSeedTask = { id: number; name: string; date: string; from: string; to: string; achieve: boolean; done: boolean; archived: boolean };
+
+function defaultTasks(): LocalSeedTask[] {
   return [
     { id: 1, name: "مراجعة ملخص المحاضرة", date: dateKey(0), from: "10:00", to: "", achieve: true, done: false, archived: false },
     { id: 2, name: "رفع النسخة النهائية للعرض", date: dateKey(0), from: "18:00", to: "", achieve: true, done: false, archived: false },
@@ -28,7 +35,7 @@ function defaultTasks(): Task[] {
   ];
 }
 
-function seedFullPlatformData(tasks: Task[]) {
+function seedFullPlatformData(tasks: LocalSeedTask[]) {
   const achievements = [
     { id: 100, name: "إكمال مراجعة الوحدة الأولى", date: dateKey(-1), cat: "تعليمي", note: "جلسة مركزة لمدة خمس وأربعين دقيقة", imgs: [], files: [], feat: true },
     { id: 101, name: "المشي ثلاثين دقيقة", date: dateKey(0), cat: "رياضي", note: null, imgs: [], files: [], feat: false },
@@ -77,31 +84,59 @@ function statusFor(task: Task) {
 }
 
 export default function TaskManager() {
-  const [tasks, setTasks] = useState<Task[]>(() => defaultTasks());
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [profileName, setProfileName] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
-    try {
-      const version = Number(localStorage.getItem("mj_demo_data_version") || 0);
-      if (version < DEMO_DATA_VERSION) {
-        const fresh = defaultTasks();
-        seedFullPlatformData(fresh);
-        setTasks(fresh);
-      } else {
-        const saved = JSON.parse(localStorage.getItem("mj_tasks") || "null");
-        if (Array.isArray(saved)) setTasks(saved);
+    let cancelled = false;
+
+    async function init() {
+      try {
+        // يبقي هذا كما كان تماماً: يضمن وجود بيانات تجريبية محلية عند أول
+        // زيارة على الإطلاق، قبل أن يتولى الترحيل رفعها إلى Supabase.
+        const version = Number(localStorage.getItem("mj_demo_data_version") || 0);
+        if (version < DEMO_DATA_VERSION) {
+          seedFullPlatformData(defaultTasks());
+        }
+        const profile = JSON.parse(localStorage.getItem("munjez_profile") || "null");
+        if (profile?.name) setProfileName(profile.name);
+
+        const supabase = createUserClient();
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) {
+          throw new Error("تعذّر التحقق من هوية المستخدم.");
+        }
+
+        const migration = await migrateLocalStorageIfNeeded(supabase, userData.user.id);
+        if (migration.error) {
+          console.warn("تعذّر ترحيل بيانات المتصفح القديمة إلى السحابة:", migration.error);
+        }
+
+        const cloudTasks = await listTasks(supabase, userData.user.id);
+
+        if (!cancelled) {
+          setUserId(userData.user.id);
+          setTasks(cloudTasks);
+          setHydrated(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError("تعذّر تحميل مهامك من الخادم. تحقق من اتصالك بالإنترنت وأعد تحميل الصفحة.");
+          setHydrated(true);
+        }
       }
-      const profile = JSON.parse(localStorage.getItem("munjez_profile") || "null");
-      if (profile?.name) setProfileName(profile.name);
-    } catch { seedFullPlatformData(defaultTasks()); }
-    setHydrated(true);
-  }, []);
+    }
 
-  useEffect(() => {
-    if (hydrated) localStorage.setItem("mj_tasks", JSON.stringify(tasks));
-  }, [tasks, hydrated]);
+    init();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const active = tasks.filter((task) => !task.archived);
   const completedCount = active.filter((task) => task.done).length;
@@ -109,14 +144,59 @@ export default function TaskManager() {
   const lateCount = active.filter((task) => !task.done && daysFromToday(task.date) < 0).length;
   const sortedTasks = useMemo(() => [...active].sort((a, b) => Number(a.done) - Number(b.done) || daysFromToday(a.date) - daysFromToday(b.date)), [active]);
 
-  const addTask = (event: React.FormEvent) => {
+  const addTask = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!title.trim()) return;
-    setTasks((current) => [{ id: Date.now(), name: title.trim(), date: dateKey(0), from: "", to: "", achieve: false, done: false, archived: false }, ...current]);
+    const name = title.trim();
+    if (!name || !userId) return;
     setTitle("");
+    setActionError("");
+    try {
+      const supabase = createUserClient();
+      const inserted = await insertTask(supabase, userId, { name, date: dateKey(0), from: "", to: "", achieve: false, done: false, archived: false });
+      setTasks((current) => [inserted, ...current]);
+    } catch {
+      setActionError("تعذّر إضافة المهمة، حاول مرة أخرى.");
+    }
+  };
+
+  const toggleDone = (task: Task, done: boolean) => {
+    setTasks((current) => current.map((item) => item.id === task.id ? { ...item, done } : item));
+    setActionError("");
+    updateTask(createUserClient(), task.id, { done }).catch(() => setActionError("تعذّر حفظ حالة المهمة."));
+  };
+
+  const removeTask = (task: Task) => {
+    setTasks((current) => current.filter((item) => item.id !== task.id));
+    setActionError("");
+    deleteTask(createUserClient(), task.id).catch(() => setActionError("تعذّر حذف المهمة."));
+  };
+
+  const archiveCompleted = () => {
+    const toArchive = active.filter((task) => task.done);
+    if (toArchive.length === 0) return;
+    setTasks((current) => current.map((task) => task.done ? { ...task, archived: true } : task));
+    setActionError("");
+    const supabase = createUserClient();
+    Promise.all(toArchive.map((task) => updateTask(supabase, task.id, { archived: true }))).catch(() =>
+      setActionError("تعذّر أرشفة بعض المهام.")
+    );
+  };
+
+  const restoreTask = (task: Task) => {
+    setTasks((current) => current.map((item) => item.id === task.id ? { ...item, archived: false } : item));
+    setActionError("");
+    updateTask(createUserClient(), task.id, { archived: false }).catch(() => setActionError("تعذّر استعادة المهمة."));
   };
 
   const tasksForOffset = (offset: number) => active.filter((task) => !task.done && daysFromToday(task.date) === offset);
+
+  if (!hydrated) {
+    return <main className="task-app" dir="rtl"><div className="task-shell"><p>جارٍ تحميل مهامك...</p></div></main>;
+  }
+
+  if (loadError) {
+    return <main className="task-app" dir="rtl"><div className="task-shell"><p className="task-status late">{loadError}</p></div></main>;
+  }
 
   return <><main className="task-app" dir="rtl">
     <header className="task-topbar">
@@ -131,11 +211,12 @@ export default function TaskManager() {
       <Tabs defaultValue="tasks" className="task-tabs" dir="rtl">
         <TabsList variant="line" className="task-tabs-list"><TabsTrigger value="tasks">المهام</TabsTrigger><TabsTrigger value="achievements">الإنجازات</TabsTrigger><TabsTrigger value="goals">الأهداف</TabsTrigger><TabsTrigger value="calendar">التقويم</TabsTrigger></TabsList>
         <TabsContent value="tasks">
+          {actionError && <p className="task-status late" role="alert">{actionError}</p>}
           <form className="quick-add" onSubmit={addTask}><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="ما المهمة التي تريد إنجازها اليوم؟" aria-label="اسم المهمة" /><button type="submit"><Plus size={18} /> إضافة</button></form>
-          <section className="task-panel"><div className="panel-title"><div><h2>مهامك</h2><span>{active.length} مهام</span></div><button onClick={() => setTasks((current) => current.map((task) => task.done ? { ...task, archived: true } : task))}><Archive size={17} /> أرشفة المكتملة</button></div>
-            <div className="task-list">{sortedTasks.map((task) => { const status = statusFor(task); return <article className={task.done ? "is-complete" : ""} key={task.id}><Checkbox checked={task.done} onCheckedChange={(checked) => setTasks((current) => current.map((item) => item.id === task.id ? { ...item, done: Boolean(checked) } : item))} aria-label={`إكمال ${task.name}`} /><div className="task-name"><strong>{task.name}</strong><span>{dateLabel(task.date)}{task.from ? ` · ${timeLabel(task.from)}` : ""}</span></div><span className={`task-status ${status.tone}`}>{status.label}</span><button className="task-delete" onClick={() => setTasks((current) => current.filter((item) => item.id !== task.id))} aria-label={`حذف ${task.name}`}><Trash2 size={16} /></button></article>; })}</div>
+          <section className="task-panel"><div className="panel-title"><div><h2>مهامك</h2><span>{active.length} مهام</span></div><button onClick={archiveCompleted}><Archive size={17} /> أرشفة المكتملة</button></div>
+            <div className="task-list">{sortedTasks.map((task) => { const status = statusFor(task); return <article className={task.done ? "is-complete" : ""} key={task.id}><Checkbox checked={task.done} onCheckedChange={(checked) => toggleDone(task, Boolean(checked))} aria-label={`إكمال ${task.name}`} /><div className="task-name"><strong>{task.name}</strong><span>{dateLabel(task.date)}{task.from ? ` · ${timeLabel(task.from)}` : ""}</span></div><span className={`task-status ${status.tone}`}>{status.label}</span><button className="task-delete" onClick={() => removeTask(task)} aria-label={`حذف ${task.name}`}><Trash2 size={16} /></button></article>; })}</div>
           </section>
-          <section className="archive-panel"><h2><Archive size={18} /> الأرشيف</h2>{tasks.filter((task) => task.archived).length ? tasks.filter((task) => task.archived).map((task) => <div key={task.id}><span>{task.name}</span><button onClick={() => setTasks((current) => current.map((item) => item.id === task.id ? { ...item, archived: false } : item))}>استعادة</button></div>) : <p>ستظهر هنا المهام المكتملة بعد أرشفتها.</p>}</section>
+          <section className="archive-panel"><h2><Archive size={18} /> الأرشيف</h2>{tasks.filter((task) => task.archived).length ? tasks.filter((task) => task.archived).map((task) => <div key={task.id}><span>{task.name}</span><button onClick={() => restoreTask(task)}>استعادة</button></div>) : <p>ستظهر هنا المهام المكتملة بعد أرشفتها.</p>}</section>
         </TabsContent>
 
         <TabsContent value="achievements"><section className="task-cards-grid"><article><CheckCircle2 /><span>هذا الأسبوع</span><h2>أكملت {completedCount} مهام</h2><p>كل خطوة مكتملة تُضاف إلى سجل تقدّمك.</p></article><article><CheckCircle2 /><span>إنجاز جديد</span><h2>إكمال مراجعة الوحدة الأولى</h2><p>جلسة مركزة لمدة خمس وأربعين دقيقة.</p></article><article><CheckCircle2 /><span>الاستمرارية</span><h2>3 جلسات قراءة</h2><p>ساعة وخمس وأربعون دقيقة من القراءة المركزة.</p></article></section></TabsContent>
