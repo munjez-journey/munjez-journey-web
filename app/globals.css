@@ -3603,3 +3603,137 @@ a {
   border-color: #10100f;
   color: #10100f;
 }
+
+/* تبويب الإنجازات (/platform) — منقول من public/munjez-platform.html،
+   بدون قسم الإحصائيات الدائرية (خارج نطاق هذه الدفعة) وبدون طي/فتح
+   البطاقة (لا حاجة له بما أن الصور والملفات مؤجّلة لدفعة لاحقة). */
+
+.ah-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.ah-row .sp {
+  flex: 1;
+}
+
+.ahcard {
+  background: #fff;
+  border: 1px solid #d9d9d5;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.ahcard.feat .ahcard-head {
+  background: #ecece8;
+}
+
+.ahcard-head {
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ahcard-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: #f7f7f5;
+  border: 1px solid #d9d9d5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #42423e;
+  flex-shrink: 0;
+}
+
+.ahcard-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ahcard-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #10100f;
+  overflow-wrap: anywhere;
+}
+
+.ahcard-meta {
+  font-size: 0.68rem;
+  color: #777772;
+  margin-top: 1px;
+}
+
+.ahcard-body {
+  padding: 0 14px 12px;
+  border-top: 1px solid #e5e5e1;
+  padding-top: 10px;
+}
+
+.ahcard-note-d {
+  font-size: 0.78rem;
+  color: #42423e;
+  border-right: 2px solid #d9d9d5;
+  padding-right: 7px;
+  margin-bottom: 9px;
+  line-height: 1.6;
+}
+
+.ahcard-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.badge {
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.b-pro { background: #dbeafe; color: #1e40af; }
+.b-per { background: #fce7f3; color: #9d174d; }
+.b-edu { background: #ede9fe; color: #5b21b6; }
+.b-wrk { background: #fef3c7; color: #92400e; }
+.b-spt { background: #d1fae5; color: #065f46; }
+.b-feat { background: #10100f; color: #fff; }
+
+.ahcard-acts {
+  display: flex;
+  gap: 5px;
+}
+
+.ahact {
+  background: #ecece8;
+  border: 1px solid #d9d9d5;
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: #42423e;
+  font-family: inherit;
+}
+
+.ahact:hover {
+  background: #e2e2dd;
+}
+
+.ahact.del:hover {
+  background: #fae8e5;
+  color: #a43225;
+}
+
+.ahact.feat-on {
+  background: #ecece8;
+  border-color: #10100f;
+  color: #10100f;
+}
