@@ -8,6 +8,8 @@ import GoalsTab from "./GoalsTab";
 import AchievementsTab from "./AchievementsTab";
 import CalendarTab from "./CalendarTab";
 import HomeTab from "./HomeTab";
+import ThemeColorPanel from "./ThemeColorPanel";
+import { usePlatformTheme } from "./usePlatformTheme";
 
 type PageId = "home" | "tasks" | "achieve" | "goals" | "cal";
 
@@ -27,9 +29,10 @@ export default function PlatformShell({
   onSignOut: () => void;
 }) {
   const [activePage, setActivePage] = useState<PageId>("home");
+  const { theme, accent, setTheme, setAccent, style } = usePlatformTheme();
 
   return (
-    <div className="pf-app" dir="rtl">
+    <div className="pf-app" dir="rtl" data-theme={theme} style={style}>
       <div className="pf-topbar">
         <button type="button" className="pf-nav-logo" onClick={() => setActivePage("home")} aria-label="الرئيسية">
           <img src="/hourglass-logo.png" alt="شعار رحلة مُنجِز" />
@@ -49,6 +52,7 @@ export default function PlatformShell({
         </div>
 
         <div className="pf-nav-right">
+          <ThemeColorPanel theme={theme} accent={accent} onThemeChange={setTheme} onAccentChange={setAccent} />
           <Link className="mini-link" href="/tasks">لوحتي المختصرة ↗</Link>
           <span className="text-sm text-muted-foreground" dir="ltr" style={{ fontSize: "0.72rem" }}>{user.email}</span>
           <button type="button" className="pf-signout" onClick={onSignOut}>تسجيل الخروج</button>
