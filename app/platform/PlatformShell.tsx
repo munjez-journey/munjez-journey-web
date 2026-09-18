@@ -10,6 +10,7 @@ import CalendarTab from "./CalendarTab";
 import HomeTab from "./HomeTab";
 import ThemeColorPanel from "./ThemeColorPanel";
 import { usePlatformTheme } from "./usePlatformTheme";
+import { MunjezFooter } from "@/components/site-chrome";
 
 type PageId = "home" | "tasks" | "achieve" | "goals" | "cal";
 
@@ -72,6 +73,8 @@ export default function PlatformShell({
           <HomeTab userId={user.id} />
         )}
       </div>
+
+      <MunjezFooter />
     </div>
   );
 }

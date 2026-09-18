@@ -3109,11 +3109,27 @@ a {
   --table-tint: #ffffff;
 
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--txt);
   font-size: 13px;
   transition: background 0.3s, color 0.3s;
 }
+
+/* الفوتر (MunjezFooter من components/site-chrome.tsx، معاد استخدامه كما هو)
+   يُلصَق بأسفل الصفحة عبر margin-top:auto ضمن .pf-app الآن flex-column،
+   ويُعاد تلوينه بمتغيّرات /platform بدل ألوان الموقع الرئيسي الثابتة، دون
+   لمس تعريف .site-footer/.footer-social الأصلي المستخدم في بقية الموقع. */
+.pf-app .site-footer {
+  margin-top: auto;
+  background: var(--bg2);
+  border-top-color: var(--border);
+}
+
+.pf-app .munjez-copyright { color: var(--txt3); }
+.pf-app .footer-social a { border-color: var(--border); }
+.pf-app .footer-social a:hover { background: var(--accent); color: #fff; }
 
 /* الزوايا هنا مدوّرة لتطابق public/munjez-platform.html، بعكس /tasks الذي
    يستخدم نفس الكلاسات (gmodal/minp/mbtn/ftabs) بزوايا حادة عمداً — لذلك
