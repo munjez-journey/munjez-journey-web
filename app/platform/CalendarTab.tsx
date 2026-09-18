@@ -64,7 +64,6 @@ export default function CalendarTab({ userId }: { userId: string }) {
 
   const [view, setView] = useState<CalView>("week");
   const [calDate, setCalDate] = useState(() => new Date());
-  const [monthAddKey, setMonthAddKey] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -251,25 +250,6 @@ export default function CalendarTab({ userId }: { userId: string }) {
                       <div key={t.id} className={`mt ${STATUS_CLASS[getStatus(t)]}`}>{t.name}</div>
                     ))}
                     {extra > 0 ? <div className="more-m">+{extra}</div> : null}
-                    {monthAddKey === k ? (
-                      <input
-                        className="wadd madd"
-                        autoFocus
-                        placeholder="اسم المهمة"
-                        onKeyDown={(e) => {
-                          const input = e.currentTarget;
-                          if (e.key === "Enter" && input.value.trim()) {
-                            quickAdd(k, input.value);
-                            setMonthAddKey(null);
-                          } else if (e.key === "Escape") {
-                            setMonthAddKey(null);
-                          }
-                        }}
-                        onBlur={() => setMonthAddKey(null)}
-                      />
-                    ) : (
-                      <button type="button" className="more-m madd-btn" onClick={() => setMonthAddKey(k)}>+ أضف</button>
-                    )}
                   </div>
                 );
               })}
