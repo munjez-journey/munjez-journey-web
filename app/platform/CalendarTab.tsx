@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createUserClient } from "@/lib/supabase/userClient";
-import { listTasks, type CloudTask } from "@/lib/tasks/cloudStore";
+import { listTasks, insertTask, type CloudTask } from "@/lib/tasks/cloudStore";
 
 const DAYS_S = ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"];
 const MONTH_HEADS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
@@ -60,9 +60,11 @@ export default function CalendarTab({ userId }: { userId: string }) {
   const [tasks, setTasks] = useState<CloudTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [addError, setAddError] = useState("");
 
   const [view, setView] = useState<CalView>("week");
   const [calDate, setCalDate] = useState(() => new Date());
+  const [monthAddKey, setMonthAddKey] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,6 +100,27 @@ export default function CalendarTab({ userId }: { userId: string }) {
     }
     return map;
   }, [tasks]);
+
+  async function quickAdd(dateKey: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setAddError("");
+    try {
+      const supabase = createUserClient();
+      const newTask = await insertTask(supabase, userId, {
+        name: trimmed,
+        date: dateKey,
+        from: "",
+        to: "",
+        achieve: false,
+        done: false,
+        archived: false,
+      });
+      setTasks((prev) => [...prev, newTask]);
+    } catch {
+      setAddError("تعذّر إضافة المهمة. تحقق من اتصالك وحاول مرة أخرى.");
+    }
+  }
 
   function navigate(dir: 1 | -1) {
     if (view === "week") {
@@ -168,6 +191,8 @@ export default function CalendarTab({ userId }: { userId: string }) {
         </div>
       </div>
 
+      {addError && <p className="task-status late" role="alert" style={{ marginBottom: 10 }}>{addError}</p>}
+
       {loadError ? (
         <div className="goals-empty">{loadError}</div>
       ) : loading ? (
@@ -187,6 +212,19 @@ export default function CalendarTab({ userId }: { userId: string }) {
                     {t.from ? <span className="wchip-t">{fmtTime(t.from)}</span> : null}
                   </div>
                 ))}
+              </div>
+              <div className="wadd-area">
+                <input
+                  className="wadd"
+                  placeholder="+ أضف مهمة"
+                  onKeyDown={(e) => {
+                    const input = e.currentTarget;
+                    if (e.key === "Enter" && input.value.trim()) {
+                      quickAdd(col.key, input.value);
+                      input.value = "";
+                    }
+                  }}
+                />
               </div>
             </div>
           ))}
@@ -213,6 +251,25 @@ export default function CalendarTab({ userId }: { userId: string }) {
                       <div key={t.id} className={`mt ${STATUS_CLASS[getStatus(t)]}`}>{t.name}</div>
                     ))}
                     {extra > 0 ? <div className="more-m">+{extra}</div> : null}
+                    {monthAddKey === k ? (
+                      <input
+                        className="wadd madd"
+                        autoFocus
+                        placeholder="اسم المهمة"
+                        onKeyDown={(e) => {
+                          const input = e.currentTarget;
+                          if (e.key === "Enter" && input.value.trim()) {
+                            quickAdd(k, input.value);
+                            setMonthAddKey(null);
+                          } else if (e.key === "Escape") {
+                            setMonthAddKey(null);
+                          }
+                        }}
+                        onBlur={() => setMonthAddKey(null)}
+                      />
+                    ) : (
+                      <button type="button" className="more-m madd-btn" onClick={() => setMonthAddKey(k)}>+ أضف</button>
+                    )}
                   </div>
                 );
               })}
