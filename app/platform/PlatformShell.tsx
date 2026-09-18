@@ -7,6 +7,7 @@ import TasksTab from "./TasksTab";
 import GoalsTab from "./GoalsTab";
 import AchievementsTab from "./AchievementsTab";
 import CalendarTab from "./CalendarTab";
+import HomeTab from "./HomeTab";
 
 type PageId = "home" | "tasks" | "achieve" | "goals" | "cal";
 
@@ -17,13 +18,6 @@ const NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "goals", label: "الأهداف" },
   { id: "cal", label: "التقويم" },
 ];
-
-const PLACEHOLDER_COPY: Record<Exclude<PageId, "tasks" | "goals" | "achieve" | "cal">, { title: string; body: string }> = {
-  home: {
-    title: "الرئيسية",
-    body: "لوحة النظرة العامة (الإحصائيات، التقدّم الشهري والسنوي) قادمة في دفعة لاحقة.",
-  },
-};
 
 export default function PlatformShell({
   user,
@@ -71,10 +65,7 @@ export default function PlatformShell({
         ) : activePage === "cal" ? (
           <CalendarTab userId={user.id} />
         ) : (
-          <div className="pf-page-placeholder">
-            <h2>{PLACEHOLDER_COPY[activePage].title}</h2>
-            <p>{PLACEHOLDER_COPY[activePage].body}</p>
-          </div>
+          <HomeTab userId={user.id} />
         )}
       </div>
     </div>
