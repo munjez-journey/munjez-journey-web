@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import TasksTab from "./TasksTab";
 import GoalsTab from "./GoalsTab";
 import AchievementsTab from "./AchievementsTab";
+import CalendarTab from "./CalendarTab";
 
 type PageId = "home" | "tasks" | "achieve" | "goals" | "cal";
 
@@ -17,14 +18,10 @@ const NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "cal", label: "التقويم" },
 ];
 
-const PLACEHOLDER_COPY: Record<Exclude<PageId, "tasks" | "goals" | "achieve">, { title: string; body: string }> = {
+const PLACEHOLDER_COPY: Record<Exclude<PageId, "tasks" | "goals" | "achieve" | "cal">, { title: string; body: string }> = {
   home: {
     title: "الرئيسية",
     body: "لوحة النظرة العامة (الإحصائيات، التقدّم الشهري والسنوي) قادمة في دفعة لاحقة.",
-  },
-  cal: {
-    title: "التقويم",
-    body: "التقويم الأسبوعي والشهري قادم في دفعة لاحقة.",
   },
 };
 
@@ -71,6 +68,8 @@ export default function PlatformShell({
           <GoalsTab userId={user.id} />
         ) : activePage === "achieve" ? (
           <AchievementsTab userId={user.id} />
+        ) : activePage === "cal" ? (
+          <CalendarTab userId={user.id} />
         ) : (
           <div className="pf-page-placeholder">
             <h2>{PLACEHOLDER_COPY[activePage].title}</h2>
