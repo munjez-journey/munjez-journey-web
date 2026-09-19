@@ -4481,3 +4481,35 @@ a {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* عناصر المهام المتكررة الافتراضية داخل التقويم/الرئيسية (/platform) —
+   بنفسجي مطابق لـ.rec-badge لتمييزها بصرياً عن المهام الحقيقية. */
+.wchip.s-rec,
+.mt.s-rec {
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+  cursor: pointer;
+}
+
+.wchip.s-rec.rec-done,
+.mt.s-rec.rec-done {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.trow.rec-row { cursor: pointer; }
+.wdot.s-rec {
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+  cursor: pointer;
+}
+.wdot.s-rec.rec-done { text-decoration: line-through; opacity: 0.7; }
+
+.rec-inline-badge {
+  font-size: 0.56rem;
+  color: #7c3aed;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 1px 5px;
+  border-radius: 10px;
+  margin-right: 5px;
+}

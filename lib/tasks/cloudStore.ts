@@ -265,6 +265,7 @@ export type CloudRecurring = {
   achieve: boolean;
   active: boolean;
   done: boolean;
+  createdAt: string;
 };
 
 type RecurringRow = {
@@ -276,9 +277,10 @@ type RecurringRow = {
   achieve: boolean;
   active: boolean;
   done: boolean;
+  created_at: string;
 };
 
-const REC_COLUMNS = "id, name, freq, weekday, from_time, achieve, active, done";
+const REC_COLUMNS = "id, name, freq, weekday, from_time, achieve, active, done, created_at";
 
 function rowToRecurring(row: RecurringRow): CloudRecurring {
   return {
@@ -290,10 +292,11 @@ function rowToRecurring(row: RecurringRow): CloudRecurring {
     achieve: row.achieve,
     active: row.active,
     done: row.done,
+    createdAt: row.created_at,
   };
 }
 
-function recurringToRow(rec: Omit<CloudRecurring, "id">) {
+function recurringToRow(rec: Omit<CloudRecurring, "id" | "createdAt">) {
   return {
     name: rec.name,
     freq: rec.freq,
@@ -320,7 +323,7 @@ export async function listRecurring(
 export async function insertRecurring(
   supabase: SupabaseClient,
   userId: string,
-  rec: Omit<CloudRecurring, "id">
+  rec: Omit<CloudRecurring, "id" | "createdAt">
 ): Promise<CloudRecurring> {
   const { data, error } = await supabase
     .from("recurring")
@@ -334,7 +337,7 @@ export async function insertRecurring(
 export async function updateRecurring(
   supabase: SupabaseClient,
   id: string,
-  patch: Partial<Omit<CloudRecurring, "id">>
+  patch: Partial<Omit<CloudRecurring, "id" | "createdAt">>
 ): Promise<void> {
   const payload: Record<string, unknown> = {};
   if (patch.name !== undefined) payload.name = patch.name;
@@ -357,10 +360,72 @@ export async function deleteRecurring(supabase: SupabaseClient, id: string): Pro
 export async function insertRecurringBulk(
   supabase: SupabaseClient,
   userId: string,
-  items: Omit<CloudRecurring, "id">[]
+  items: Omit<CloudRecurring, "id" | "createdAt">[]
 ): Promise<void> {
   if (items.length === 0) return;
   const rows = items.map((r) => ({ user_id: userId, ...recurringToRow(r) }));
   const { error } = await supabase.from("recurring").insert(rows);
+  if (error) throw error;
+}
+
+/* ===================== Recurring Completions ===================== */
+/* غياب الصف = غير منجز لذلك اليوم؛ الإدراج/الحذف فقط، بلا update، لتتبّع
+   إنجاز مستقل لكل يوم لكل مهمة متكررة (بعكس حقل recurring.done العام). */
+
+export type CloudRecurringCompletion = {
+  id: string;
+  recurringId: string;
+  date: string;
+};
+
+type RecurringCompletionRow = {
+  id: string;
+  recurring_id: string;
+  date: string;
+};
+
+const RC_COLUMNS = "id, recurring_id, date";
+
+function rowToRecurringCompletion(row: RecurringCompletionRow): CloudRecurringCompletion {
+  return { id: row.id, recurringId: row.recurring_id, date: row.date };
+}
+
+export async function listRecurringCompletions(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<CloudRecurringCompletion[]> {
+  const { data, error } = await supabase
+    .from("recurring_completions")
+    .select(RC_COLUMNS)
+    .eq("user_id", userId);
+  if (error) throw error;
+  return ((data ?? []) as RecurringCompletionRow[]).map(rowToRecurringCompletion);
+}
+
+export async function markRecurringDone(
+  supabase: SupabaseClient,
+  userId: string,
+  recurringId: string,
+  date: string
+): Promise<CloudRecurringCompletion> {
+  const { data, error } = await supabase
+    .from("recurring_completions")
+    .insert({ user_id: userId, recurring_id: recurringId, date })
+    .select(RC_COLUMNS)
+    .single();
+  if (error) throw error;
+  return rowToRecurringCompletion(data as RecurringCompletionRow);
+}
+
+export async function unmarkRecurringDone(
+  supabase: SupabaseClient,
+  recurringId: string,
+  date: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("recurring_completions")
+    .delete()
+    .eq("recurring_id", recurringId)
+    .eq("date", date);
   if (error) throw error;
 }
