@@ -4431,3 +4431,53 @@ a {
   background: var(--bg3);
   color: var(--txt);
 }
+
+/* تبويب "المتكررة" الفرعي داخل تبويب المهام (/platform) — منقول حرفياً من
+   المرجع، مبني أصلاً على متغيّرات الثيم فيستجيب لفاتح/غامق واللون تلقائياً. */
+.rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rec-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.rec-info { flex: 1; }
+.rec-name { font-size: 0.72rem; font-weight: 500; color: var(--txt); }
+.rec-meta { font-size: 0.6rem; color: var(--txt3); margin-top: 1px; }
+
+.rec-badge {
+  font-size: 0.6rem;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+.rec-acts { display: flex; gap: 3px; }
+
+.tog-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 0.6rem;
+  color: var(--txt2);
+  font-family: inherit;
+}
+
+.tog-btn.on {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}

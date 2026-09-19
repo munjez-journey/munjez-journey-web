@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createUserClient } from "@/lib/supabase/userClient";
 import { listTasks, insertTask, updateTask, deleteTask, type CloudTask } from "@/lib/tasks/cloudStore";
 import TimePicker from "./TimePicker";
+import RecurringSection from "./RecurringSection";
 
 const DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 const MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
@@ -330,12 +331,7 @@ export default function TasksTab({ userId }: { userId: string }) {
         </div>
       )}
 
-      {mainTab === "rec" && (
-        <div className="pf-page-placeholder">
-          <h2>المهام المتكررة</h2>
-          <p>هذا القسم قادم في دفعة لاحقة.</p>
-        </div>
-      )}
+      {mainTab === "rec" && <RecurringSection userId={userId} />}
 
       {editingTask && (
         <div className="moverlay" onClick={(event) => { if (event.target === event.currentTarget) closeEdit(); }}>
