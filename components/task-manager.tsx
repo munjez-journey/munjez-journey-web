@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MunjezFooter } from "@/components/site-chrome";
 import { createUserClient } from "@/lib/supabase/userClient";
-import { listTasks, type CloudTask, listGoals, type CloudGoal } from "@/lib/tasks/cloudStore";
+import { listTasks, type CloudTask, listGoals, type CloudGoal, listAchievements, type CloudAchievement } from "@/lib/tasks/cloudStore";
 
 type Task = CloudTask;
 
@@ -126,8 +126,33 @@ export default function TaskManager() {
     }
   };
 
+  const [achievements, setAchievements] = useState<CloudAchievement[]>([]);
+  const [achievementsLoaded, setAchievementsLoaded] = useState(false);
+  const [achievementsLoading, setAchievementsLoading] = useState(false);
+  const [achievementsError, setAchievementsError] = useState("");
+
+  const loadAchievements = async () => {
+    setAchievementsLoading(true);
+    setAchievementsError("");
+    try {
+      const supabase = createUserClient();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        throw new Error("تعذّر التحقق من هوية المستخدم.");
+      }
+      const cloudAchievements = await listAchievements(supabase, userData.user.id);
+      setAchievements(cloudAchievements);
+      setAchievementsLoaded(true);
+    } catch {
+      setAchievementsError("تعذّر تحميل الإنجازات من الخادم.");
+    } finally {
+      setAchievementsLoading(false);
+    }
+  };
+
   const handleTabChange = (value: string) => {
     if (value === "goals" && !goalsLoaded) loadGoals();
+    if (value === "achievements" && !achievementsLoaded) loadAchievements();
   };
 
   if (!hydrated) {
@@ -157,7 +182,26 @@ export default function TaskManager() {
           <section className="archive-panel"><h2><Archive size={18} /> الأرشيف</h2>{archivedTasks.length ? archivedTasks.map((task) => <div key={task.id}><span>{task.name}</span></div>) : <p>ستظهر هنا المهام المكتملة بعد أرشفتها.</p>}</section>
         </TabsContent>
 
-        <TabsContent value="achievements"><section className="task-cards-grid"><article><CheckCircle2 /><span>هذا الأسبوع</span><h2>أكملت {completedCount} مهام</h2><p>كل خطوة مكتملة تُضاف إلى سجل تقدّمك.</p></article><article><CheckCircle2 /><span>إنجاز جديد</span><h2>إكمال مراجعة الوحدة الأولى</h2><p>جلسة مركزة لمدة خمس وأربعين دقيقة.</p></article><article><CheckCircle2 /><span>الاستمرارية</span><h2>3 جلسات قراءة</h2><p>ساعة وخمس وأربعون دقيقة من القراءة المركزة.</p></article></section></TabsContent>
+        <TabsContent value="achievements">
+          {achievementsError && <p className="task-status late" role="alert">{achievementsError}</p>}
+          {achievementsLoading && <p style={{ padding: "20px" }}>جارٍ تحميل الإنجازات...</p>}
+          {!achievementsLoading && (
+            achievements.length === 0 ? (
+              <div className="goals-empty">لا توجد إنجازات بعد. أضِف إنجازك الأول من منصة مُنجِز الكاملة.</div>
+            ) : (
+              <section className="task-cards-grid">
+                {achievements.map((achievement) => (
+                  <article key={achievement.id}>
+                    <CheckCircle2 />
+                    <span>{achievement.cat}</span>
+                    <h2>{achievement.name}</h2>
+                    <p>{achievement.note || dateLabel(achievement.date)}</p>
+                  </article>
+                ))}
+              </section>
+            )
+          )}
+        </TabsContent>
 
         <TabsContent value="goals">
           {goalsError && <p className="task-status late" role="alert">{goalsError}</p>}
