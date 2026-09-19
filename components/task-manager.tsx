@@ -141,7 +141,7 @@ export default function TaskManager() {
   return <><main className="task-app" dir="rtl">
     <header className="task-topbar">
       <Link className="task-brand" href="/"><img src="/hourglass-logo.png" alt="شعار رحلة مُنجِز" /><strong>رحـلـة مُـنـجِـز</strong></Link>
-      <div className="task-top-actions"><Link className="full-platform-link" href="/munjez-platform.html">فتح منصة مُنجِز الكاملة <ArrowUpLeft size={17} /></Link><Link className="back-to-site" href="/">العودة للموقع <ArrowLeft size={17} /></Link></div>
+      <div className="task-top-actions"><Link className="full-platform-link" href="/platform">فتح منصة مُنجِز الكاملة <ArrowUpLeft size={17} /></Link><Link className="back-to-site" href="/">العودة للموقع <ArrowLeft size={17} /></Link></div>
     </header>
 
     <div className="task-shell">
@@ -186,7 +186,7 @@ export default function TaskManager() {
         <TabsContent value="calendar"><section className="calendar-view"><div className="calendar-day is-today"><b>اليوم</b><strong>{dateLabel(dateKey(0))}</strong>{tasksForOffset(0).map((task) => <span key={task.id}>{task.name}</span>)}</div><div className="calendar-day"><b>غدًا</b><strong>{dateLabel(dateKey(1))}</strong>{tasksForOffset(1).map((task) => <span key={task.id}>{task.name}</span>)}</div><div className="calendar-day"><b>قادم</b><strong>{dateLabel(dateKey(4))}</strong>{tasksForOffset(4).map((task) => <span key={task.id}>{task.name}</span>)}</div><CalendarDays size={28} /></section></TabsContent>
       </Tabs>
 
-      <section className="platform-handoff"><div><span>تحتاج التفاصيل؟</span><h2>كل أدوات مُنجِز في مكان واحد</h2><p>افتح المنصة الكاملة لإدارة المواعيد، المهام المتكررة، سجل الإنجازات، الأهداف والتقويم الأسبوعي والشهري.</p></div><Link href="/munjez-platform.html">الانتقال إلى منصة مُنجِز <ArrowLeft size={18} /></Link></section>
+      <section className="platform-handoff"><div><span>تحتاج التفاصيل؟</span><h2>كل أدوات مُنجِز في مكان واحد</h2><p>افتح المنصة الكاملة لإدارة المواعيد، المهام المتكررة، سجل الإنجازات، الأهداف والتقويم الأسبوعي والشهري.</p></div><Link href="/platform">الانتقال إلى منصة مُنجِز <ArrowLeft size={18} /></Link></section>
     </div>
   </main><MunjezFooter /></>;
 }
