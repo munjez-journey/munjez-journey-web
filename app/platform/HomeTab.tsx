@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createUserClient } from "@/lib/supabase/userClient";
 import {
   listTasks,
+  updateTask,
   listAchievements,
   listRecurring,
   listRecurringCompletions,
@@ -166,6 +167,16 @@ export default function HomeTab({ userId }: { userId: string }) {
     }
   }
 
+  function toggleTaskDone(taskId: string, currentDone: boolean) {
+    const next = !currentDone;
+    setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, done: next } : t)));
+    setActionError("");
+    updateTask(createUserClient(), taskId, { done: next }).catch(() => {
+      setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, done: currentDone } : t)));
+      setActionError("تعذّر تحديث حالة المهمة.");
+    });
+  }
+
   const todayTasks = useMemo(() => buildDayItems(todayKey, now), [tasksByDate, recurring, completionsSet, todayKey, now]);
   const todayDoneCount = todayTasks.filter((t) => t.done).length;
 
@@ -230,7 +241,7 @@ export default function HomeTab({ userId }: { userId: string }) {
             {todayTasks.length ? (
               todayTasks.map((t) =>
                 t.kind === "task" ? (
-                  <div className="trow" key={t.id}>
+                  <div className="trow" key={t.id} onClick={() => toggleTaskDone(t.id, t.done)}>
                     <div className={`chk${t.done ? " on" : ""}`} />
                     <span className="trow-txt">{t.name}</span>
                     <span className="trow-time" dir="ltr">{t.from ? fmtTime(t.from) : ""}</span>
@@ -265,7 +276,7 @@ export default function HomeTab({ userId }: { userId: string }) {
             <div key={col.key} className={`wc${col.isToday ? " td" : ""}`}>
               {col.items.slice(0, 3).map((t) =>
                 t.kind === "task" ? (
-                  <span key={t.id} className={`wdot${t.done ? " done" : ""}`}>{t.done ? "✓ " : ""}{t.name}</span>
+                  <span key={t.id} className={`wdot${t.done ? " done" : ""}`} onClick={() => toggleTaskDone(t.id, t.done)}>{t.done ? "✓ " : ""}{t.name}</span>
                 ) : (
                   <span
                     key={t.id}

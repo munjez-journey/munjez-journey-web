@@ -3947,6 +3947,7 @@ a {
   padding: 3px 5px;
   font-size: 0.62rem;
   line-height: 1.3;
+  cursor: pointer;
 }
 
 .wchip-n {
@@ -4025,6 +4026,7 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  cursor: pointer;
 }
 
 .mt.s-dn { color: var(--txt3); text-decoration: line-through; background: transparent; }
@@ -4124,6 +4126,7 @@ a {
   gap: 8px;
   padding: 5px 0;
   border-bottom: 1px solid var(--border);
+  cursor: pointer;
 }
 
 .trow:last-child { border-bottom: none; }
@@ -4203,6 +4206,7 @@ a {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
+  cursor: pointer;
 }
 
 .wdot.done { background: var(--accent-bg); color: var(--accent); }

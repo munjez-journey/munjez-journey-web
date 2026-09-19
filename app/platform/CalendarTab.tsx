@@ -5,6 +5,7 @@ import { createUserClient } from "@/lib/supabase/userClient";
 import {
   listTasks,
   insertTask,
+  updateTask,
   listRecurring,
   listRecurringCompletions,
   markRecurringDone,
@@ -73,7 +74,7 @@ function isRecurringDue(rec: CloudRecurring, dateKey: string, dateObj: Date): bo
 }
 
 type DisplayItem =
-  | { kind: "task"; id: string; from: string; name: string; statusClass: string }
+  | { kind: "task"; id: string; from: string; name: string; statusClass: string; done: boolean }
   | { kind: "recurring"; id: string; from: string; name: string; done: boolean; recId: string; dateKey: string };
 
 type CalView = "week" | "month";
@@ -145,6 +146,7 @@ export default function CalendarTab({ userId }: { userId: string }) {
       from: t.from,
       name: t.name,
       statusClass: STATUS_CLASS[getStatus(t)],
+      done: t.done,
     }));
     const recItems: DisplayItem[] = recurring
       .filter((r) => isRecurringDue(r, dateKey, dateObj))
@@ -158,6 +160,16 @@ export default function CalendarTab({ userId }: { userId: string }) {
         dateKey,
       }));
     return [...real, ...recItems].sort((a, b) => (a.from || "").localeCompare(b.from || ""));
+  }
+
+  function toggleTaskDone(taskId: string, currentDone: boolean) {
+    const next = !currentDone;
+    setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, done: next } : t)));
+    setActionError("");
+    updateTask(createUserClient(), taskId, { done: next }).catch(() => {
+      setTasks((cur) => cur.map((t) => (t.id === taskId ? { ...t, done: currentDone } : t)));
+      setActionError("تعذّر تحديث حالة المهمة.");
+    });
   }
 
   function toggleRecurringDone(recId: string, dateKey: string, currentlyDone: boolean) {
@@ -292,7 +304,7 @@ export default function CalendarTab({ userId }: { userId: string }) {
               <div className="wbody">
                 {col.items.map((item) =>
                   item.kind === "task" ? (
-                    <div key={item.id} className={`wchip ${item.statusClass}`}>
+                    <div key={item.id} className={`wchip ${item.statusClass}`} onClick={() => toggleTaskDone(item.id, item.done)}>
                       <span className="wchip-n">{item.name}</span>
                       {item.from ? <span className="wchip-t">{fmtTime(item.from)}</span> : null}
                     </div>
@@ -344,7 +356,7 @@ export default function CalendarTab({ userId }: { userId: string }) {
                     <div className="mdate">{cell.date.getDate()}</div>
                     {shown.map((item) =>
                       item.kind === "task" ? (
-                        <div key={item.id} className={`mt ${item.statusClass}`}>{item.name}</div>
+                        <div key={item.id} className={`mt ${item.statusClass}`} onClick={() => toggleTaskDone(item.id, item.done)}>{item.name}</div>
                       ) : (
                         <div
                           key={item.id}
