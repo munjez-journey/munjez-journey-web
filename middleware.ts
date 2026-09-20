@@ -37,6 +37,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // فحص الدور الخادمي — مبدأ الفشل المغلق: أي خطأ أو غياب صفّ أو دور غير
+  // "admin" يُعامَل كغير مصرَّح، لا كسماح افتراضي.
+  if (user && !isLoginPage) {
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const isAdmin = !profileError && profile?.role === "admin";
+
+    if (!isAdmin) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/admin/login";
+      loginUrl.search = "?error=unauthorized";
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return response;
 }
 

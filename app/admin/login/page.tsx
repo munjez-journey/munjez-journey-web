@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isUnauthorized = searchParams.get("error") === "unauthorized";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -42,6 +45,12 @@ export default function AdminLoginPage() {
         <p className="mb-8 text-center text-sm text-muted-foreground">
           لوحة تحكم رحلة مُنجِز
         </p>
+
+        {isUnauthorized && (
+          <p className="mb-6 text-center text-sm text-destructive" role="alert">
+            هذا الحساب لا يملك صلاحية الوصول للوحة التحكم.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -90,5 +99,19 @@ export default function AdminLoginPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-background px-6">
+          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+        </main>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
   );
 }

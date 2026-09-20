@@ -24,11 +24,28 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data, error }) => {
+    supabase.auth.getUser().then(async ({ data, error }) => {
       if (error || !data.user) {
         router.replace("/admin/login");
         return;
       }
+
+      // طبقة دفاع ثانية (بعد middleware.ts) — نفس فحص الدور بمبدأ الفشل
+      // المغلق: أي خطأ أو دور غير "admin" يعني تسجيل الخروج والتوجيه.
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      const isAdmin = !profileError && profile?.role === "admin";
+
+      if (!isAdmin) {
+        await supabase.auth.signOut();
+        router.replace("/admin/login?error=unauthorized");
+        return;
+      }
+
       setUser(data.user);
       setChecking(false);
     });
