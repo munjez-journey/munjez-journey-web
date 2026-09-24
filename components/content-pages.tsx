@@ -43,15 +43,45 @@ export function ArticlesPage({
   </PageFrame>;
 }
 
-export function PodcastPage() {
+type DbEpisodeSummary = {
+  id: number;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  date: string;
+};
+
+export function PodcastPage({ episodes = [] }: { episodes?: DbEpisodeSummary[] }) {
+  const [latest, ...rest] = episodes;
   return <PageFrame><PageIntro kicker="بودكاست خُطوة" title="حديث هادئ عن الاستمرار" description="حلقات قصيرة وعملية تساعدك على تجاوز التعثر والعودة إلى خطوتك التالية." />
     <section className="episode-catalog shell">
-      <article className="episode-feature"><div className="catalog-podcast-image"><img src="/podcast-motivation.webp" alt="جرافيك لمسار يستمر بعد اختفاء دفعة الحماس" /><span><Headphones size={18} /> بودكاست خُطوة</span></div><div><span className="content-tag">الحلقة 01</span><h2>كيف نستمر حين يختفي الحماس؟</h2><p>حديث عن العادات والتوقعات الواقعية، ولماذا لا نحتاج إلى يوم مثالي كي نتقدم.</p><button className="play-button"><Play size={18} fill="currentColor" /> استمع الآن <span>32:18</span></button></div></article>
-      {[
-        ["بين التخطيط والتنفيذ", "/podcast-plan-action.webp", "جرافيك لشبكة تخطيط تتحول إلى درجات"],
-        ["إنجاز يناسب حياتك", "/podcast-real-life.webp", "جرافيك لأشكال مرنة تستقر في إيقاع يومي"],
-        ["ماذا نفعل بعد التعثر؟", "/podcast-restart.webp", "يد تعيد قطعة إلى مسار متصل"],
-      ].map(([title, image, alt], i) => <article className="episode-row" key={title}><img className="episode-row-image" src={image} alt={alt} /><b>{String(i + 2).padStart(2,"0")}</b><div><span>قريبًا</span><h3>{title}</h3></div><Play size={18} /></article>)}
+      {episodes.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد حلقات منشورة بعد.</p>}
+      {latest && (
+        <Link href={`/podcast/${latest.id}`}>
+          <article className="episode-feature">
+            <div className="catalog-podcast-image">
+              {latest.imageUrl && <img src={latest.imageUrl} alt={latest.title} />}
+              <span><Headphones size={18} /> بودكاست خُطوة</span>
+            </div>
+            <div>
+              <span className="content-tag">{latest.date}</span>
+              <h2>{latest.title}</h2>
+              {latest.description && <p>{latest.description}</p>}
+              <button className="play-button"><Play size={18} fill="currentColor" /> استمع الآن</button>
+            </div>
+          </article>
+        </Link>
+      )}
+      {rest.map((episode, i) => (
+        <Link href={`/podcast/${episode.id}`} key={episode.id}>
+          <article className="episode-row">
+            {episode.imageUrl && <img className="episode-row-image" src={episode.imageUrl} alt={episode.title} />}
+            <b>{String(i + 2).padStart(2, "0")}</b>
+            <div><span>{episode.date}</span><h3>{episode.title}</h3></div>
+            <Play size={18} />
+          </article>
+        </Link>
+      ))}
     </section>
   </PageFrame>;
 }

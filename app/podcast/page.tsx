@@ -1,4 +1,29 @@
 import type { Metadata } from "next";
 import { PodcastPage } from "@/components/content-pages";
-export const metadata: Metadata = { title: "البودكاست | رحلة مُنجِز", description: "بودكاست خُطوة من رحلة مُنجِز." };
-export default PodcastPage;
+import { supabase } from "@/lib/supabaseClient";
+
+export const metadata: Metadata = { title: "بودكاست خُطوة | رحلة مُنجِز", description: "حلقات قصيرة وعملية تساعدك على تجاوز التعثر والعودة إلى خطوتك التالية." };
+
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const { data } = await supabase
+    .from("podcast_episodes")
+    .select("id, title, description, image_url, created_at")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false });
+
+  const episodes = (data ?? []).map((item) => ({
+    id: item.id as number,
+    title: item.title as string,
+    description: item.description as string | null,
+    imageUrl: item.image_url as string | null,
+    date: new Date(item.created_at as string).toLocaleDateString("ar-EG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+  }));
+
+  return <PodcastPage episodes={episodes} />;
+}
