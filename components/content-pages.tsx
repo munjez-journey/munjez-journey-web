@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Headphones, Mail, Play } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
 import LikeButton from "@/app/articles/LikeButton";
+import BookmarkButton from "@/app/articles/BookmarkButton";
 
 export function PageIntro({ kicker, title, description }: { kicker: string; title: string; description: string }) {
   return <header className="page-intro shell"><span>{kicker}</span><h1>{title}</h1><p>{description}</p></header>;
@@ -33,7 +34,10 @@ export function ArticlesPage({
           <p>{article.excerpt}</p>
           <div className="editorial-card-actions">
             <b>اقرأ المقال <ArrowLeft size={18} /></b>
-            <LikeButton contentType="article" contentId={Number(article.id)} initialCount={likeCounts[Number(article.id)] ?? 0} />
+            <div className="card-actions-buttons">
+              <LikeButton contentType="article" contentId={Number(article.id)} initialCount={likeCounts[Number(article.id)] ?? 0} />
+              <BookmarkButton contentType="article" contentId={Number(article.id)} />
+            </div>
           </div>
         </Link>
       ))}
@@ -75,7 +79,10 @@ export function PodcastPage({
               {latest.description && <p>{latest.description}</p>}
               <div className="editorial-card-actions">
                 <button className="play-button"><Play size={18} fill="currentColor" /> استمع الآن</button>
-                <LikeButton contentType="podcast" contentId={latest.id} initialCount={likeCounts[latest.id] ?? 0} />
+                <div className="card-actions-buttons">
+                  <LikeButton contentType="podcast" contentId={latest.id} initialCount={likeCounts[latest.id] ?? 0} />
+                  <BookmarkButton contentType="podcast" contentId={latest.id} />
+                </div>
               </div>
             </div>
           </article>
@@ -89,7 +96,10 @@ export function PodcastPage({
             <div>
               <span>{episode.date}</span>
               <h3>{episode.title}</h3>
-              <LikeButton contentType="podcast" contentId={episode.id} initialCount={likeCounts[episode.id] ?? 0} />
+              <div className="card-actions-buttons">
+                <LikeButton contentType="podcast" contentId={episode.id} initialCount={likeCounts[episode.id] ?? 0} />
+                <BookmarkButton contentType="podcast" contentId={episode.id} />
+              </div>
             </div>
             <Play size={18} />
           </article>
@@ -126,7 +136,10 @@ export function NewsPage({
               <h2>{item.title}</h2>
               <p>{item.excerpt}</p>
               <div className="editorial-card-actions">
-                <LikeButton contentType="news" contentId={item.id} initialCount={likeCounts[item.id] ?? 0} />
+                <div className="card-actions-buttons">
+                  <LikeButton contentType="news" contentId={item.id} initialCount={likeCounts[item.id] ?? 0} />
+                  <BookmarkButton contentType="news" contentId={item.id} />
+                </div>
               </div>
             </div>
           </article>

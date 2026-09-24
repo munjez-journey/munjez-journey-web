@@ -6,6 +6,7 @@ import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import MarkdownContent from "../../articles/MarkdownContent";
 import LikeButton from "../../articles/LikeButton";
+import BookmarkButton from "../../articles/BookmarkButton";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,7 @@ export default async function ChampionStoryPage({
           {champion.short_description && <p>{champion.short_description}</p>}
           <div>
             <LikeButton contentType="champion" contentId={champion.id} initialCount={likeCount} />
+            <BookmarkButton contentType="champion" contentId={champion.id} />
           </div>
         </header>
 

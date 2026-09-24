@@ -5,6 +5,7 @@ import { PageFrame } from "@/components/site-chrome";
 import { PageIntro } from "@/components/content-pages";
 import { supabase } from "@/lib/supabaseClient";
 import LikeButton from "@/app/articles/LikeButton";
+import BookmarkButton from "@/app/articles/BookmarkButton";
 
 export const metadata: Metadata = {
   title: "أبطال الرحلة | رحلة مُنجِز",
@@ -48,7 +49,10 @@ export default async function ChampionsPage() {
             {champion.short_description && <p>{champion.short_description}</p>}
             <div className="editorial-card-actions">
               <b>اقرأ القصة <ArrowLeft size={18} /></b>
-              <LikeButton contentType="champion" contentId={champion.id} initialCount={likeCounts[champion.id] ?? 0} />
+              <div className="card-actions-buttons">
+                <LikeButton contentType="champion" contentId={champion.id} initialCount={likeCounts[champion.id] ?? 0} />
+                <BookmarkButton contentType="champion" contentId={champion.id} />
+              </div>
             </div>
           </div>
         </Link>

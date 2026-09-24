@@ -6,6 +6,7 @@ import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import MarkdownContent from "../../articles/MarkdownContent";
 import LikeButton from "../../articles/LikeButton";
+import BookmarkButton from "../../articles/BookmarkButton";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,7 @@ export default async function DynamicNewsPage({
               })}
             </time>
             <LikeButton contentType="news" contentId={item.id} initialCount={likeCount} />
+            <BookmarkButton contentType="news" contentId={item.id} />
           </div>
         </header>
 

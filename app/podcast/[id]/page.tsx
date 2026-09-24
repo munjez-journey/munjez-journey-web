@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import LikeButton from "../../articles/LikeButton";
+import BookmarkButton from "../../articles/BookmarkButton";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,7 @@ export default async function DynamicPodcastPage({
               })}
             </time>
             <LikeButton contentType="podcast" contentId={item.id} initialCount={likeCount} />
+            <BookmarkButton contentType="podcast" contentId={item.id} />
           </div>
         </header>
 
