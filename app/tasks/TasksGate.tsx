@@ -5,10 +5,12 @@ import type { User } from "@supabase/supabase-js";
 import { createUserClient } from "@/lib/supabase/userClient";
 import TaskManager from "@/components/task-manager";
 import TasksAuthScreen from "./TasksAuthScreen";
+import TasksPreview from "./TasksPreview";
 
 export default function TasksGate() {
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
+  const [showAuthScreen, setShowAuthScreen] = useState(false);
 
   useEffect(() => {
     const supabase = createUserClient();
@@ -42,7 +44,10 @@ export default function TasksGate() {
   }
 
   if (!user) {
-    return <TasksAuthScreen onAuthenticated={setUser} />;
+    if (showAuthScreen) {
+      return <TasksAuthScreen onAuthenticated={setUser} />;
+    }
+    return <TasksPreview onRequestAuth={() => setShowAuthScreen(true)} />;
   }
 
   return (
