@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createUserClient } from "@/lib/supabase/userClient";
 import TaskManager from "@/components/task-manager";
 import TasksAuthScreen from "./TasksAuthScreen";
 import TasksPreview from "./TasksPreview";
 
-export default function TasksGate() {
+function TasksGateContent() {
+  const searchParams = useSearchParams();
+  const forceLogin = searchParams.get("login") === "1";
+
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
-  const [showAuthScreen, setShowAuthScreen] = useState(false);
+  const [showAuthScreen, setShowAuthScreen] = useState(forceLogin);
 
   useEffect(() => {
     const supabase = createUserClient();
@@ -65,5 +69,19 @@ export default function TasksGate() {
       </div>
       <TaskManager />
     </div>
+  );
+}
+
+export default function TasksGate() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-background">
+          <p className="text-muted-foreground">جارٍ التحقق من الدخول...</p>
+        </main>
+      }
+    >
+      <TasksGateContent />
+    </Suspense>
   );
 }

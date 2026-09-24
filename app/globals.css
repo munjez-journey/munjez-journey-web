@@ -114,6 +114,42 @@
   margin-top: 28px;
 }
 
+.editorial-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.editorial-card-actions b {
+  margin-top: 0;
+}
+
+.like-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.like-button:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.like-button.liked {
+  border-color: var(--destructive);
+  color: var(--destructive);
+}
+
 .episode-catalog,
 .news-list,
 .faq-list,

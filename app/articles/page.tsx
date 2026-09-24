@@ -42,5 +42,18 @@ export default async function Page() {
     }),
   }));
 
-  return <ArticlesPage articles={articles} />;
+  const articleIds = (data ?? []).map((article) => article.id as number);
+  const likeCounts: Record<number, number> = {};
+  if (articleIds.length > 0) {
+    const { data: counts } = await supabase
+      .from("like_counts")
+      .select("content_id, likes_count")
+      .eq("content_type", "article")
+      .in("content_id", articleIds);
+    for (const row of counts ?? []) {
+      likeCounts[row.content_id as number] = row.likes_count as number;
+    }
+  }
+
+  return <ArticlesPage articles={articles} likeCounts={likeCounts} />;
 }

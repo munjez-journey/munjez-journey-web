@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Headphones, Mail, Play } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
+import LikeButton from "@/app/articles/LikeButton";
 
 export function PageIntro({ kicker, title, description }: { kicker: string; title: string; description: string }) {
   return <header className="page-intro shell"><span>{kicker}</span><h1>{title}</h1><p>{description}</p></header>;
@@ -16,8 +17,10 @@ type DbArticleSummary = {
 
 export function ArticlesPage({
   articles = [],
+  likeCounts = {},
 }: {
   articles?: DbArticleSummary[];
+  likeCounts?: Record<number, number>;
 }) {
   return <PageFrame><PageIntro kicker="المقالات" title="أفكار تساعدك على التقدّم" description="نكتب عن الاستمرارية، تنظيم الوقت، وبناء إنجازات صغيرة يمكن رؤيتها والاحتفاء بها." />
     <section className="listing-grid shell">
@@ -28,7 +31,10 @@ export function ArticlesPage({
           <span>{article.date}</span>
           <h2>{article.title}</h2>
           <p>{article.excerpt}</p>
-          <b>اقرأ المقال <ArrowLeft size={18} /></b>
+          <div className="editorial-card-actions">
+            <b>اقرأ المقال <ArrowLeft size={18} /></b>
+            <LikeButton articleId={Number(article.id)} initialCount={likeCounts[Number(article.id)] ?? 0} />
+          </div>
         </Link>
       ))}
       <article className="editorial-card"><div className="editorial-card-image"><img src="/article-consistency.webp" alt="شخص يصعد درجات ثابتة في رحلة طويلة" /></div><span>قريبًا</span><h2>الاستمرارية أقوى من الحماس</h2><p>عن بناء عادات لا تعتمد على المزاج أو البدايات المثالية.</p></article>
