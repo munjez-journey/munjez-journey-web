@@ -30,7 +30,7 @@ export function OptionalSignIn() {
   if (user) {
     const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email || "حسابي";
     return (
-      <Link className="account-button signed-in" href="/tasks">
+      <Link className="account-button signed-in" href="/account">
         <UserRound size={17} />
         <span>{displayName}</span>
       </Link>
