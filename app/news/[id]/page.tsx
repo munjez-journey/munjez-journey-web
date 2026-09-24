@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import MarkdownContent from "../../articles/MarkdownContent";
+import LikeButton from "../../articles/LikeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,14 @@ export default async function DynamicNewsPage({
     notFound();
   }
 
+  const { data: countRow } = await supabase
+    .from("like_counts")
+    .select("likes_count")
+    .eq("content_type", "news")
+    .eq("content_id", item.id)
+    .maybeSingle();
+  const likeCount = countRow?.likes_count ?? 0;
+
   return (
     <PageFrame>
       <article className="article-page shell">
@@ -44,6 +53,7 @@ export default async function DynamicNewsPage({
                 day: "numeric",
               })}
             </time>
+            <LikeButton contentType="news" contentId={item.id} initialCount={likeCount} />
           </div>
         </header>
 

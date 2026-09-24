@@ -61,7 +61,7 @@ export default async function DynamicArticlePage({
                 day: "numeric",
               })}
             </time>
-            <LikeButton articleId={Number(article.id)} initialCount={likeCount} />
+            <LikeButton contentType="article" contentId={Number(article.id)} initialCount={likeCount} />
           </div>
         </header>
 

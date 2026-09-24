@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import MarkdownContent from "../../articles/MarkdownContent";
+import LikeButton from "../../articles/LikeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ export default async function ChampionStoryPage({
 
   const { data: champion, error } = await supabase
     .from("champions")
-    .select("name, tag, short_description, story_content, image_url, is_published")
+    .select("id, name, tag, short_description, story_content, image_url, is_published")
     .eq("slug", slug)
     .eq("is_published", true)
     .single();
@@ -46,6 +47,14 @@ export default async function ChampionStoryPage({
   if (error || !champion) {
     notFound();
   }
+
+  const { data: countRow } = await supabase
+    .from("like_counts")
+    .select("likes_count")
+    .eq("content_type", "champion")
+    .eq("content_id", champion.id)
+    .maybeSingle();
+  const likeCount = countRow?.likes_count ?? 0;
 
   return (
     <PageFrame>
@@ -58,6 +67,9 @@ export default async function ChampionStoryPage({
           {champion.tag && <span>{champion.tag}</span>}
           <h1>{champion.name}</h1>
           {champion.short_description && <p>{champion.short_description}</p>}
+          <div>
+            <LikeButton contentType="champion" contentId={champion.id} initialCount={likeCount} />
+          </div>
         </header>
 
         {champion.image_url && (

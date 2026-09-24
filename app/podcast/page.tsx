@@ -25,5 +25,18 @@ export default async function Page() {
     }),
   }));
 
-  return <PodcastPage episodes={episodes} />;
+  const episodeIds = (data ?? []).map((item) => item.id as number);
+  const likeCounts: Record<number, number> = {};
+  if (episodeIds.length > 0) {
+    const { data: counts } = await supabase
+      .from("like_counts")
+      .select("content_id, likes_count")
+      .eq("content_type", "podcast")
+      .in("content_id", episodeIds);
+    for (const row of counts ?? []) {
+      likeCounts[row.content_id as number] = row.likes_count as number;
+    }
+  }
+
+  return <PodcastPage episodes={episodes} likeCounts={likeCounts} />;
 }

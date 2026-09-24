@@ -33,7 +33,7 @@ export function ArticlesPage({
           <p>{article.excerpt}</p>
           <div className="editorial-card-actions">
             <b>اقرأ المقال <ArrowLeft size={18} /></b>
-            <LikeButton articleId={Number(article.id)} initialCount={likeCounts[Number(article.id)] ?? 0} />
+            <LikeButton contentType="article" contentId={Number(article.id)} initialCount={likeCounts[Number(article.id)] ?? 0} />
           </div>
         </Link>
       ))}
@@ -51,7 +51,13 @@ type DbEpisodeSummary = {
   date: string;
 };
 
-export function PodcastPage({ episodes = [] }: { episodes?: DbEpisodeSummary[] }) {
+export function PodcastPage({
+  episodes = [],
+  likeCounts = {},
+}: {
+  episodes?: DbEpisodeSummary[];
+  likeCounts?: Record<number, number>;
+}) {
   const [latest, ...rest] = episodes;
   return <PageFrame><PageIntro kicker="بودكاست خُطوة" title="حديث هادئ عن الاستمرار" description="حلقات قصيرة وعملية تساعدك على تجاوز التعثر والعودة إلى خطوتك التالية." />
     <section className="episode-catalog shell">
@@ -67,7 +73,10 @@ export function PodcastPage({ episodes = [] }: { episodes?: DbEpisodeSummary[] }
               <span className="content-tag">{latest.date}</span>
               <h2>{latest.title}</h2>
               {latest.description && <p>{latest.description}</p>}
-              <button className="play-button"><Play size={18} fill="currentColor" /> استمع الآن</button>
+              <div className="editorial-card-actions">
+                <button className="play-button"><Play size={18} fill="currentColor" /> استمع الآن</button>
+                <LikeButton contentType="podcast" contentId={latest.id} initialCount={likeCounts[latest.id] ?? 0} />
+              </div>
             </div>
           </article>
         </Link>
@@ -77,7 +86,11 @@ export function PodcastPage({ episodes = [] }: { episodes?: DbEpisodeSummary[] }
           <article className="episode-row">
             {episode.imageUrl && <img className="episode-row-image" src={episode.imageUrl} alt={episode.title} />}
             <b>{String(i + 2).padStart(2, "0")}</b>
-            <div><span>{episode.date}</span><h3>{episode.title}</h3></div>
+            <div>
+              <span>{episode.date}</span>
+              <h3>{episode.title}</h3>
+              <LikeButton contentType="podcast" contentId={episode.id} initialCount={likeCounts[episode.id] ?? 0} />
+            </div>
             <Play size={18} />
           </article>
         </Link>
@@ -94,7 +107,13 @@ type DbNewsSummary = {
   date: string;
 };
 
-export function NewsPage({ news = [] }: { news?: DbNewsSummary[] }) {
+export function NewsPage({
+  news = [],
+  likeCounts = {},
+}: {
+  news?: DbNewsSummary[];
+  likeCounts?: Record<number, number>;
+}) {
   return <PageFrame><PageIntro kicker="الأخبار" title="ما يحدث في رحلة مُنجِز" description="آخر تحديثات المنصة والمنتجات والمحتوى الجديد." />
     <section className="news-list shell">
       {news.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد أخبار منشورة بعد.</p>}
@@ -103,7 +122,13 @@ export function NewsPage({ news = [] }: { news?: DbNewsSummary[] }) {
           <article>
             <time>{item.date}</time>
             {item.imageUrl && <img className="news-list-image" src={item.imageUrl} alt={item.title} />}
-            <div><h2>{item.title}</h2><p>{item.excerpt}</p></div>
+            <div>
+              <h2>{item.title}</h2>
+              <p>{item.excerpt}</p>
+              <div className="editorial-card-actions">
+                <LikeButton contentType="news" contentId={item.id} initialCount={likeCounts[item.id] ?? 0} />
+              </div>
+            </div>
           </article>
         </Link>
       ))}

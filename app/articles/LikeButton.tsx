@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { createUserClient } from "@/lib/supabase/userClient";
 
+export type LikeContentType = "article" | "news" | "podcast" | "champion";
+
 export default function LikeButton({
-  articleId,
+  contentType,
+  contentId,
   initialCount,
 }: {
-  articleId: number;
+  contentType: LikeContentType;
+  contentId: number;
   initialCount: number;
 }) {
   const router = useRouter();
@@ -31,8 +35,8 @@ export default function LikeButton({
       const { data: existing } = await supabase
         .from("likes")
         .select("id")
-        .eq("content_type", "article")
-        .eq("content_id", articleId)
+        .eq("content_type", contentType)
+        .eq("content_id", contentId)
         .maybeSingle();
 
       if (!cancelled && existing) setLiked(true);
@@ -42,7 +46,7 @@ export default function LikeButton({
     return () => {
       cancelled = true;
     };
-  }, [articleId]);
+  }, [contentType, contentId]);
 
   function handleClick(event: React.MouseEvent) {
     event.preventDefault();
@@ -64,8 +68,8 @@ export default function LikeButton({
     setCount((c) => (wasLiked ? c - 1 : c + 1));
 
     const action = wasLiked
-      ? supabase.from("likes").delete().eq("user_id", userId).eq("content_type", "article").eq("content_id", articleId)
-      : supabase.from("likes").insert({ user_id: userId, content_type: "article", content_id: articleId });
+      ? supabase.from("likes").delete().eq("user_id", userId).eq("content_type", contentType).eq("content_id", contentId)
+      : supabase.from("likes").insert({ user_id: userId, content_type: contentType, content_id: contentId });
 
     action.then(({ error }) => {
       if (error) {

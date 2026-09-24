@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
 import { PageIntro } from "@/components/content-pages";
 import { supabase } from "@/lib/supabaseClient";
+import LikeButton from "@/app/articles/LikeButton";
 
 export const metadata: Metadata = {
   title: "أبطال الرحلة | رحلة مُنجِز",
@@ -21,6 +22,19 @@ export default async function ChampionsPage() {
 
   const champions = data ?? [];
 
+  const championIds = champions.map((champion) => champion.id as number);
+  const likeCounts: Record<number, number> = {};
+  if (championIds.length > 0) {
+    const { data: counts } = await supabase
+      .from("like_counts")
+      .select("content_id, likes_count")
+      .eq("content_type", "champion")
+      .in("content_id", championIds);
+    for (const row of counts ?? []) {
+      likeCounts[row.content_id as number] = row.likes_count as number;
+    }
+  }
+
   return <PageFrame>
     <PageIntro kicker="أبطال الرحلة" title="أشخاص عاديون، رحلات تستحق أن تُروى" description="نشارك تجارب أشخاص لم يبدأوا بظروف مثالية، لكنهم وجدوا خطوتهم التالية واستمروا." />
     <section className="champions-list shell">
@@ -32,7 +46,10 @@ export default async function ChampionsPage() {
             {champion.tag && <span className="content-tag">{champion.tag}</span>}
             <h2>{champion.name}</h2>
             {champion.short_description && <p>{champion.short_description}</p>}
-            <b>اقرأ القصة <ArrowLeft size={18} /></b>
+            <div className="editorial-card-actions">
+              <b>اقرأ القصة <ArrowLeft size={18} /></b>
+              <LikeButton contentType="champion" contentId={champion.id} initialCount={likeCounts[champion.id] ?? 0} />
+            </div>
           </div>
         </Link>
       ))}
