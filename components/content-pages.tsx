@@ -56,12 +56,27 @@ export function PodcastPage() {
   </PageFrame>;
 }
 
-export function NewsPage() {
+type DbNewsSummary = {
+  id: number;
+  title: string;
+  excerpt: string;
+  imageUrl: string | null;
+  date: string;
+};
+
+export function NewsPage({ news = [] }: { news?: DbNewsSummary[] }) {
   return <PageFrame><PageIntro kicker="الأخبار" title="ما يحدث في رحلة مُنجِز" description="آخر تحديثات المنصة والمنتجات والمحتوى الجديد." />
     <section className="news-list shell">
-      <article><time>1 سبتمبر 2026</time><img className="news-list-image" src="/news-app-launch.webp" alt="جرافيك أبيض وأسود لمساحة إدارة المهام" /><div><span>المنصة</span><h2>نطلق النسخة الأولى من مساحة متابعة الإنجاز</h2><p>تجربة عربية تجمع مهام اليوم، التقويم، والأهداف في مكان واحد.</p></div></article>
-      <article><time>28 أغسطس 2026</time><img className="news-list-image" src="/news-notebook.webp" alt="دفتر تخطيط بلون كريمي على مكتب" /><div><span>المتجر</span><h2>دفتر الإنجازات الصغيرة متاح قريبًا</h2><p>منتج عملي لتخطيط أسبوع واضح بلا تعقيد.</p></div></article>
-      <article><time>24 أغسطس 2026</time><img className="news-list-image" src="/news-newsletter.webp" alt="رسالة ورقية وتقويم أسبوعي صغير" /><div><span>النشرة</span><h2>رسالة أسبوعية تعيد ترتيب أولوياتك</h2><p>مقال وفكرة وخطوة عملية تصل إلى بريدك.</p></div></article>
+      {news.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد أخبار منشورة بعد.</p>}
+      {news.map((item) => (
+        <Link className="news-list-link" href={`/news/${item.id}`} key={item.id}>
+          <article>
+            <time>{item.date}</time>
+            {item.imageUrl && <img className="news-list-image" src={item.imageUrl} alt={item.title} />}
+            <div><h2>{item.title}</h2><p>{item.excerpt}</p></div>
+          </article>
+        </Link>
+      ))}
     </section>
   </PageFrame>;
 }
