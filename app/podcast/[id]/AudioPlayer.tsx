@@ -36,17 +36,23 @@ export default function AudioPlayer({
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoadedMetadata = () => setDuration(audio.duration);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
     const onEnded = () => setIsPlaying(false);
     const onError = () => setError(true);
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("loadedmetadata", onLoadedMetadata);
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
 
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("loadedmetadata", onLoadedMetadata);
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("error", onError);
     };
@@ -56,12 +62,16 @@ export default function AudioPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
+    if (audio.paused) {
+      audio.play().catch((err: DOMException) => {
+        // AbortError يحدث عند مقاطعة play() باستدعاء pause() سريع تال —
+        // سلوك طبيعي عند الضغط المتكرر، لا خطأ فعلياً يستحق الإبلاغ عنه.
+        if (err.name !== "AbortError") {
+          setError(true);
+        }
+      });
     } else {
-      audio.play();
-      setIsPlaying(true);
+      audio.pause();
     }
   }
 
