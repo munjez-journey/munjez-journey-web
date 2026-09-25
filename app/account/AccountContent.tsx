@@ -239,7 +239,7 @@ export default function AccountContent({ user }: { user: User }) {
       <PageIntro kicker="حسابي" title={displayName} description="إعجاباتك ومحفوظاتك في مكان واحد." />
       <section className="account-section shell">
         <form className="account-name-form" onSubmit={handleSaveName}>
-          <label htmlFor="display-name">اسم العرض</label>
+          <label htmlFor="display-name">كيف تحب نناديك؟</label>
           <div className="account-name-row">
             <input
               id="display-name"
@@ -250,12 +250,13 @@ export default function AccountContent({ user }: { user: User }) {
                 setNameInput(event.target.value);
                 setNameSaved(false);
               }}
-              placeholder={user.email ?? ""}
+              placeholder="اكتب اسمك هنا…"
             />
             <button type="submit" disabled={savingName}>
               {savingName ? "جارٍ الحفظ..." : "حفظ"}
             </button>
           </div>
+          <p style={{ margin: "8px 0 0", fontSize: "0.82rem", color: "var(--muted)" }}>سنستخدمه للترحيب بك.</p>
           {nameError && <p className="account-name-message error">{nameError}</p>}
           {nameSaved && !nameError && <p className="account-name-message success">تم الحفظ.</p>}
         </form>
