@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, RotateCw } from "lucide-react";
 
-const SKIP_SECONDS = 15;
+const REWIND_SECONDS = 15;
+const FORWARD_SECONDS = 30;
+const SPEEDS = [1, 1.5, 2] as const;
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -12,11 +14,20 @@ function formatTime(seconds: number): string {
   return `${mins}:${String(secs).padStart(2, "0")}`;
 }
 
-export default function AudioPlayer({ audioUrl }: { audioUrl: string }) {
+export default function AudioPlayer({
+  audioUrl,
+  imageUrl,
+  title,
+}: {
+  audioUrl: string;
+  imageUrl: string | null;
+  title: string;
+}) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -68,30 +79,46 @@ export default function AudioPlayer({ audioUrl }: { audioUrl: string }) {
     setCurrentTime(value);
   }
 
+  function handleSpeedChange(speed: number) {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.playbackRate = speed;
+    setPlaybackRate(speed);
+  }
+
   if (error) {
     return <p className="audio-player-error">تعذّر تحميل الصوت.</p>;
   }
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const remaining = Math.max(duration - currentTime, 0);
 
   return (
     <div className="audio-player">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
+      {imageUrl && (
+        <div className="audio-player-cover">
+          <img src={imageUrl} alt={title} />
+        </div>
+      )}
+
       <div className="audio-player-controls">
-        <button type="button" className="audio-player-skip" onClick={() => skip(-SKIP_SECONDS)} aria-label="الرجوع 15 ثانية">
-          <RotateCcw size={22} />
+        <button type="button" className="audio-player-skip" onClick={() => skip(-REWIND_SECONDS)} aria-label={`الرجوع ${REWIND_SECONDS} ثانية`}>
+          <RotateCcw size={24} />
+          <span>{REWIND_SECONDS}</span>
         </button>
         <button type="button" className="audio-player-play" onClick={togglePlay} aria-label={isPlaying ? "إيقاف" : "تشغيل"}>
-          {isPlaying ? <Pause size={26} fill="currentColor" /> : <Play size={26} fill="currentColor" />}
+          {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
         </button>
-        <button type="button" className="audio-player-skip" onClick={() => skip(SKIP_SECONDS)} aria-label="التقديم 15 ثانية">
-          <RotateCw size={22} />
+        <button type="button" className="audio-player-skip" onClick={() => skip(FORWARD_SECONDS)} aria-label={`التقديم ${FORWARD_SECONDS} ثانية`}>
+          <RotateCw size={24} />
+          <span>{FORWARD_SECONDS}</span>
         </button>
       </div>
 
-      <div className="audio-player-progress">
-        <span className="audio-player-time" dir="ltr">{formatTime(currentTime)}</span>
+      <div className="audio-player-progress" dir="ltr">
+        <span className="audio-player-time">{formatTime(currentTime)}</span>
         <input
           type="range"
           className="audio-player-range"
@@ -100,10 +127,23 @@ export default function AudioPlayer({ audioUrl }: { audioUrl: string }) {
           step={0.1}
           value={currentTime}
           onChange={handleSeek}
-          style={{ background: `linear-gradient(to left, var(--ink) ${progressPercent}%, var(--line) ${progressPercent}%)` }}
+          style={{ background: `linear-gradient(to right, var(--ink) ${progressPercent}%, var(--line) ${progressPercent}%)` }}
           aria-label="موضع التشغيل"
         />
-        <span className="audio-player-time" dir="ltr">{formatTime(duration)}</span>
+        <span className="audio-player-time">-{formatTime(remaining)}</span>
+      </div>
+
+      <div className="audio-player-speeds">
+        {SPEEDS.map((speed) => (
+          <button
+            key={speed}
+            type="button"
+            className={playbackRate === speed ? "audio-player-speed active" : "audio-player-speed"}
+            onClick={() => handleSpeedChange(speed)}
+          >
+            ×{speed}
+          </button>
+        ))}
       </div>
     </div>
   );

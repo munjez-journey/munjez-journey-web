@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -59,20 +58,7 @@ export default async function DynamicPodcastPage({
           </div>
         </header>
 
-        {item.image_url && (
-          <div className="article-hero">
-            <Image
-              src={item.image_url}
-              alt={item.title}
-              fill
-              priority
-              sizes="(max-width: 900px) 100vw, 1200px"
-              unoptimized
-            />
-          </div>
-        )}
-
-        {item.audio_url && <AudioPlayer audioUrl={item.audio_url} />}
+        {item.audio_url && <AudioPlayer audioUrl={item.audio_url} imageUrl={item.image_url} title={item.title} />}
 
         {item.description && (
           <div className="article-body">
