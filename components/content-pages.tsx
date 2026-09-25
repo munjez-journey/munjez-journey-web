@@ -149,9 +149,36 @@ export function NewsPage({
   </PageFrame>;
 }
 
-export function StorePage() {
-  return <PageFrame><PageIntro kicker="المتجر" title="أدوات تجعل الإنجاز ملموسًا" description="منتجات صُممت لترافق رحلتك اليومية. المتجر قيد التجهيز وسيُفتح قريبًا." />
-    <section className="store-grid store-page-grid shell"><article className="product-card"><div className="product-visual notebook"><span>رحلة مُنجِز</span><small>دفتر الإنجازات الصغيرة</small></div><div className="product-meta"><div><h3>دفتر الإنجازات الصغيرة</h3><p>تخطيط أسبوعي بلا تعقيد</p></div><strong>قريبًا</strong></div></article><article className="product-card"><div className="product-visual cards"><span>52</span><small>بطاقة لفكرة كل أسبوع</small></div><div className="product-meta"><div><h3>بطاقات خُطوة</h3><p>أسئلة تساعدك على البدء</p></div><strong>قريبًا</strong></div></article></section>
+type DbProductSummary = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string | null;
+};
+
+export function StorePage({ products = [] }: { products?: DbProductSummary[] }) {
+  const description =
+    products.length === 0
+      ? "منتجات صُممت لترافق رحلتك اليومية. المتجر قيد التجهيز وسيُفتح قريبًا."
+      : "منتجات صُممت لترافق رحلتك اليومية.";
+
+  return <PageFrame><PageIntro kicker="المتجر" title="أدوات تجعل الإنجاز ملموسًا" description={description} />
+    {products.length > 0 && (
+      <section className="store-grid store-page-grid shell">
+        {products.map((product) => (
+          <article className="product-card" key={product.id}>
+            <div className="product-visual product-visual-image">
+              {product.imageUrl && <img src={product.imageUrl} alt={product.name} />}
+            </div>
+            <div className="product-meta">
+              <div><h3>{product.name}</h3><p>{product.description}</p></div>
+              <strong>{product.price.toLocaleString("ar-EG")} ر.س</strong>
+            </div>
+          </article>
+        ))}
+      </section>
+    )}
   </PageFrame>;
 }
 

@@ -1297,6 +1297,12 @@ a {
   background: #deded9;
 }
 
+.product-visual-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .product-visual.notebook::before {
   width: min(280px, 58%);
   aspect-ratio: 0.72;
