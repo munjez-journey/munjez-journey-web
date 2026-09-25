@@ -917,7 +917,7 @@ a {
   position: relative;
   min-height: 540px;
   overflow: hidden;
-  background: #e9ebd4;
+  background: var(--soft);
 }
 
 .feature-image img {
