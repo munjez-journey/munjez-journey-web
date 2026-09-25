@@ -182,6 +182,74 @@
   margin-block: 54px 100px;
 }
 
+.account-name-form {
+  max-width: 440px;
+  margin-bottom: 48px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.account-name-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.account-name-row {
+  display: flex;
+  gap: 10px;
+}
+
+.account-name-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.account-name-row input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.account-name-row button {
+  padding: 10px 20px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.account-name-row button:hover {
+  opacity: 0.85;
+}
+
+.account-name-row button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.account-name-message {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+}
+
+.account-name-message.error {
+  color: var(--destructive);
+}
+
+.account-name-message.success {
+  color: var(--muted);
+}
+
 .account-tabs {
   display: flex;
   gap: 8px;

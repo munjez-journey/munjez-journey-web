@@ -8,6 +8,7 @@ import { createUserClient } from "@/lib/supabase/userClient";
 
 export function OptionalSignIn() {
   const [user, setUser] = useState<User | null>(null);
+  const [profileDisplayName, setProfileDisplayName] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -25,10 +26,34 @@ export function OptionalSignIn() {
     return () => subscription.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      setProfileDisplayName(null);
+      return;
+    }
+
+    let cancelled = false;
+    const supabase = createUserClient();
+
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setProfileDisplayName(data?.display_name ?? null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   if (!checked) return null;
 
   if (user) {
-    const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email || "حسابي";
+    const displayName =
+      profileDisplayName || user.user_metadata?.full_name || user.user_metadata?.name || user.email || "حسابي";
     return (
       <Link className="account-button signed-in" href="/account">
         <UserRound size={17} />

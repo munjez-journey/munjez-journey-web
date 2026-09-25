@@ -36,6 +36,67 @@ export default function AccountContent({ user }: { user: User }) {
   const [likedItems, setLikedItems] = useState<AccountCard[]>([]);
   const [savedItems, setSavedItems] = useState<AccountCard[]>([]);
 
+  const [savedDisplayName, setSavedDisplayName] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [nameSaved, setNameSaved] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProfile() {
+      const supabase = createUserClient();
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+      const current = data?.display_name ?? null;
+      setSavedDisplayName(current);
+      setNameInput(current ?? "");
+    }
+
+    loadProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, [user.id]);
+
+  async function handleSaveName(event: React.FormEvent) {
+    event.preventDefault();
+    if (savingName) return;
+
+    setSavingName(true);
+    setNameError("");
+    setNameSaved(false);
+
+    const supabase = createUserClient();
+    const trimmed = nameInput.trim();
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: trimmed || null })
+      .eq("id", user.id);
+
+    setSavingName(false);
+
+    if (error) {
+      setNameError("تعذّر حفظ الاسم. حاول مرة أخرى.");
+      setNameInput(savedDisplayName ?? "");
+      return;
+    }
+
+    setSavedDisplayName(trimmed || null);
+    setNameInput(trimmed);
+    setNameSaved(true);
+  }
+
+  const displayName =
+    savedDisplayName || user.user_metadata?.full_name || user.user_metadata?.name || user.email || "حسابي";
+
   useEffect(() => {
     let cancelled = false;
 
@@ -175,8 +236,30 @@ export default function AccountContent({ user }: { user: User }) {
 
   return (
     <PageFrame>
-      <PageIntro kicker="حسابي" title={user.email ?? "حسابي"} description="إعجاباتك ومحفوظاتك في مكان واحد." />
+      <PageIntro kicker="حسابي" title={displayName} description="إعجاباتك ومحفوظاتك في مكان واحد." />
       <section className="account-section shell">
+        <form className="account-name-form" onSubmit={handleSaveName}>
+          <label htmlFor="display-name">اسم العرض</label>
+          <div className="account-name-row">
+            <input
+              id="display-name"
+              type="text"
+              maxLength={60}
+              value={nameInput}
+              onChange={(event) => {
+                setNameInput(event.target.value);
+                setNameSaved(false);
+              }}
+              placeholder={user.email ?? ""}
+            />
+            <button type="submit" disabled={savingName}>
+              {savingName ? "جارٍ الحفظ..." : "حفظ"}
+            </button>
+          </div>
+          {nameError && <p className="account-name-message error">{nameError}</p>}
+          {nameSaved && !nameError && <p className="account-name-message success">تم الحفظ.</p>}
+        </form>
+
         <div className="account-tabs">
           <button
             type="button"
