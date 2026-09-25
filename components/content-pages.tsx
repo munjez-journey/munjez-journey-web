@@ -14,6 +14,7 @@ type DbArticleSummary = {
   excerpt: string;
   imageUrl: string | null;
   date: string;
+  readingMinutes: number;
 };
 
 export function ArticlesPage({
@@ -23,10 +24,27 @@ export function ArticlesPage({
   articles?: DbArticleSummary[];
   likeCounts?: Record<number, number>;
 }) {
+  const [featured, ...rest] = articles;
+
   return <PageFrame><PageIntro kicker="المقالات" title="أفكار تساعدك على التقدّم" description="نكتب عن الاستمرارية، تنظيم الوقت، وبناء إنجازات صغيرة يمكن رؤيتها والاحتفاء بها." />
     <section className="listing-grid shell">
-      <Link className="editorial-card editorial-card-main" href="/articles/small-steps"><div className="editorial-card-image"><img src="/article-small-steps.webp" alt="طالب يبدأ طريقه عبر الكتب والخطوات الصغيرة" /></div><span>رحلة الإنجاز · 7 دقائق</span><h2>لماذا تبدأ الإنجازات الكبيرة بخطوة صغيرة؟</h2><p>كيف نصنع نظامًا يحترم طاقتنا ويقودنا بهدوء إلى ما نريد؟</p><b>اقرأ المقال <ArrowLeft size={18} /></b></Link>
-      {articles.map((article) => (
+      {articles.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد مقالات منشورة بعد.</p>}
+      {featured && (
+        <Link className="editorial-card editorial-card-main" href={`/articles/${featured.id}`}>
+          {featured.imageUrl && <div className="editorial-card-image"><img src={featured.imageUrl} alt={featured.title} /></div>}
+          <span>رحلة الإنجاز · {featured.readingMinutes} دقائق قراءة</span>
+          <h2>{featured.title}</h2>
+          <p>{featured.excerpt}</p>
+          <div className="editorial-card-actions">
+            <b>اقرأ المقال <ArrowLeft size={18} /></b>
+            <div className="card-actions-buttons">
+              <LikeButton contentType="article" contentId={Number(featured.id)} initialCount={likeCounts[Number(featured.id)] ?? 0} />
+              <BookmarkButton contentType="article" contentId={Number(featured.id)} />
+            </div>
+          </div>
+        </Link>
+      )}
+      {rest.map((article) => (
         <Link className="editorial-card" href={`/articles/${article.id}`} key={article.id}>
           {article.imageUrl && <div className="editorial-card-image"><img src={article.imageUrl} alt={article.title} /></div>}
           <span>{article.date}</span>
@@ -41,8 +59,6 @@ export function ArticlesPage({
           </div>
         </Link>
       ))}
-      <article className="editorial-card"><div className="editorial-card-image"><img src="/article-consistency.webp" alt="شخص يصعد درجات ثابتة في رحلة طويلة" /></div><span>قريبًا</span><h2>الاستمرارية أقوى من الحماس</h2><p>عن بناء عادات لا تعتمد على المزاج أو البدايات المثالية.</p></article>
-      <article className="editorial-card"><div className="editorial-card-image"><img src="/article-record.webp" alt="يد توثّق الإنجازات الصغيرة على لوحة" /></div><span>قريبًا</span><h2>كيف ترى إنجازك قبل أن تنساه؟</h2><p>طريقة بسيطة لتوثيق الخطوات الصغيرة والعودة إليها.</p></article>
     </section>
   </PageFrame>;
 }

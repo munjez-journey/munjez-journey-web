@@ -28,19 +28,23 @@ export default async function Page() {
     .eq("is_published", true)
     .order("created_at", { ascending: false });
 
-  const articles = (data ?? []).map((article) => ({
-    id: article.id as string | number,
-    title: article.title as string,
-    excerpt:
-      (article.description as string | null) ||
-      excerptFromMarkdown((article.content as string) ?? ""),
-    imageUrl: article.image_url as string | null,
-    date: new Date(article.created_at as string).toLocaleDateString("ar-EG", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
-  }));
+  const articles = (data ?? []).map((article) => {
+    const wordCount = ((article.content as string) ?? "").trim().split(/\s+/).filter(Boolean).length;
+    return {
+      id: article.id as string | number,
+      title: article.title as string,
+      excerpt:
+        (article.description as string | null) ||
+        excerptFromMarkdown((article.content as string) ?? ""),
+      imageUrl: article.image_url as string | null,
+      date: new Date(article.created_at as string).toLocaleDateString("ar-EG", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      readingMinutes: Math.max(1, Math.round(wordCount / 200)),
+    };
+  });
 
   const articleIds = (data ?? []).map((article) => article.id as number);
   const likeCounts: Record<number, number> = {};
