@@ -362,6 +362,8 @@
 .episode-feature .play-button {
   align-self: flex-start;
   margin-top: 26px;
+  border-bottom-color: var(--ink);
+  color: var(--ink);
 }
 
 .episode-row {
