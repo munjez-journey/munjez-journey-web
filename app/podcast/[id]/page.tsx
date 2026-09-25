@@ -6,6 +6,7 @@ import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import LikeButton from "../../articles/LikeButton";
 import BookmarkButton from "../../articles/BookmarkButton";
+import AudioPlayer from "./AudioPlayer";
 
 export const dynamic = "force-dynamic";
 
@@ -71,11 +72,7 @@ export default async function DynamicPodcastPage({
           </div>
         )}
 
-        {item.audio_url && (
-          <audio className="podcast-player" controls src={item.audio_url} style={{ width: "100%", margin: "24px 0" }}>
-            متصفحك لا يدعم تشغيل الصوت.
-          </audio>
-        )}
+        {item.audio_url && <AudioPlayer audioUrl={item.audio_url} />}
 
         {item.description && (
           <div className="article-body">

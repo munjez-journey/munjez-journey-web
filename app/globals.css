@@ -565,6 +565,121 @@
   object-fit: cover;
 }
 
+.audio-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: min(760px, calc(100% - 32px));
+  margin: 40px auto 0;
+  padding: 28px clamp(20px, 4vw, 40px);
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.audio-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.audio-player-skip,
+.audio-player-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: opacity 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.audio-player-skip {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+}
+
+.audio-player-skip:hover {
+  border-color: var(--ink);
+}
+
+.audio-player-play {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+
+.audio-player-play:hover {
+  opacity: 0.85;
+}
+
+.audio-player-progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.audio-player-time {
+  min-width: 40px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.audio-player-range {
+  flex: 1;
+  height: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 999px;
+  cursor: pointer;
+  outline: none;
+}
+
+.audio-player-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+.audio-player-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.audio-player-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+}
+
+.audio-player-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.audio-player-error {
+  width: min(760px, calc(100% - 32px));
+  margin: 40px auto 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  color: var(--destructive);
+  text-align: center;
+}
+
 .article-body {
   width: min(760px, calc(100% - 32px));
   margin: 64px auto 0;
