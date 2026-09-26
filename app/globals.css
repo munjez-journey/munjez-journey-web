@@ -573,8 +573,8 @@
   width: min(420px, calc(100% - 32px));
   margin: 58px auto 0;
   padding: 28px clamp(20px, 4vw, 40px);
-  border: 1px solid var(--line);
-  background: var(--white);
+  border: 1px solid var(--ink);
+  background: linear-gradient(180deg, #f7f0e3 0%, var(--paper) 100%);
 }
 
 .audio-player-cover {

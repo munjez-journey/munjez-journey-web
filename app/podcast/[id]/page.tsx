@@ -45,6 +45,7 @@ export default async function DynamicPodcastPage({
         <header>
           <span>بودكاست خُطوة</span>
           <h1>{item.title}</h1>
+          {item.description && <p>{item.description}</p>}
           <div>
             <time>
               {new Date(item.created_at).toLocaleDateString("ar-EG", {
@@ -59,12 +60,6 @@ export default async function DynamicPodcastPage({
         </header>
 
         {item.audio_url && <AudioPlayer audioUrl={item.audio_url} imageUrl={item.image_url} title={item.title} />}
-
-        {item.description && (
-          <div className="article-body">
-            <p>{item.description}</p>
-          </div>
-        )}
       </article>
     </PageFrame>
   );
