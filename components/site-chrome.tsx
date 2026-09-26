@@ -1,9 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpLeft, Mail, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { OptionalSignIn } from "@/components/account-access";
+import { createUserClient } from "@/lib/supabase/userClient";
+
+const DEFAULT_SOCIAL_LINKS = {
+  x: "https://x.com/munjez_journey",
+  instagram: "https://www.instagram.com/munjez_journey/",
+  linkedin: "https://www.linkedin.com/company/munjez-journey/",
+  tiktok: "https://www.tiktok.com/@munjez_journey",
+};
+
+function useSocialLinks() {
+  const [links, setLinks] = useState(DEFAULT_SOCIAL_LINKS);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createUserClient();
+
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["social_x", "social_instagram", "social_linkedin", "social_tiktok"])
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const map: Record<string, string> = {};
+        for (const row of data) {
+          if (row.value) map[row.key as string] = row.value as string;
+        }
+        setLinks({
+          x: map.social_x ?? DEFAULT_SOCIAL_LINKS.x,
+          instagram: map.social_instagram ?? DEFAULT_SOCIAL_LINKS.instagram,
+          linkedin: map.social_linkedin ?? DEFAULT_SOCIAL_LINKS.linkedin,
+          tiktok: map.social_tiktok ?? DEFAULT_SOCIAL_LINKS.tiktok,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return links;
+}
 
 const navItems = [
   ["الرئيسية", "/"],
@@ -80,6 +122,7 @@ export function Newsletter() {
 }
 
 export function SiteFooter() {
+  const social = useSocialLinks();
   return (
     <footer className="site-footer">
       <div className="shell footer-top">
@@ -87,27 +130,28 @@ export function SiteFooter() {
         <div className="footer-column"><strong>رحلة مُنجِز</strong><Link href="/#app">التطبيق</Link><Link href="/about">عن المشروع</Link><Link href="/contact">تواصل معنا</Link><Link href="/faq">الأسئلة الشائعة</Link></div>
         <div className="footer-column"><strong>قانوني</strong><Link href="/privacy">سياسة الخصوصية</Link><Link href="/terms">الشروط والأحكام</Link><Link href="/cookies">سياسة ملفات الارتباط</Link><Link href="/content-policy">سياسة المحتوى</Link></div>
         <div className="footer-social"><strong>تابع الرحلة</strong><div>
-          <a href="https://x.com/munjez_journey" aria-label="X"><SocialIcon name="x" /></a>
-          <a href="https://www.instagram.com/munjez_journey/" aria-label="Instagram"><SocialIcon name="instagram" /></a>
-          <a href="https://www.linkedin.com/company/munjez-journey/" aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>
-          <a href="https://www.tiktok.com/@munjez_journey" aria-label="TikTok"><SocialIcon name="tiktok" /></a>
+          <a href={social.x} aria-label="X"><SocialIcon name="x" /></a>
+          <a href={social.instagram} aria-label="Instagram"><SocialIcon name="instagram" /></a>
+          <a href={social.linkedin} aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>
+          <a href={social.tiktok} aria-label="TikTok"><SocialIcon name="tiktok" /></a>
         </div></div>
       </div>
-      <div className="shell footer-bottom"><span>© 2026 رحلة مُنجِز. جميع الحقوق محفوظة.</span></div>
+      <div className="shell footer-bottom"><span>© {new Date().getFullYear()} رحلة مُنجِز. جميع الحقوق محفوظة.</span></div>
     </footer>
   );
 }
 
 export function MunjezFooter() {
+  const social = useSocialLinks();
   return (
     <footer className="site-footer munjez-footer">
       <div className="shell munjez-footer-row">
-        <span className="munjez-copyright">© 2026 رحلة مُنجِز. جميع الحقوق محفوظة.</span>
+        <span className="munjez-copyright">© {new Date().getFullYear()} رحلة مُنجِز. جميع الحقوق محفوظة.</span>
         <div className="footer-social"><strong>تابع الرحلة</strong><div>
-          <a href="https://x.com/munjez_journey" aria-label="X"><SocialIcon name="x" /></a>
-          <a href="https://www.instagram.com/munjez_journey/" aria-label="Instagram"><SocialIcon name="instagram" /></a>
-          <a href="https://www.linkedin.com/company/munjez-journey/" aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>
-          <a href="https://www.tiktok.com/@munjez_journey" aria-label="TikTok"><SocialIcon name="tiktok" /></a>
+          <a href={social.x} aria-label="X"><SocialIcon name="x" /></a>
+          <a href={social.instagram} aria-label="Instagram"><SocialIcon name="instagram" /></a>
+          <a href={social.linkedin} aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>
+          <a href={social.tiktok} aria-label="TikTok"><SocialIcon name="tiktok" /></a>
         </div></div>
       </div>
     </footer>

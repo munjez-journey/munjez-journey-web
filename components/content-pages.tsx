@@ -198,17 +198,35 @@ export function StorePage({ products = [] }: { products?: DbProductSummary[] }) 
   </PageFrame>;
 }
 
-export function ContactPage() {
+export function ContactPage({
+  helloEmail = "hello@munjez-journey.com",
+  infoEmail = "info@munjez-journey.com",
+  supportEmail = "support@munjez-journey.com",
+}: {
+  helloEmail?: string;
+  infoEmail?: string;
+  supportEmail?: string;
+}) {
   const contacts = [
-    ["مرحبًا وتعاون", "hello@munjez-journey.com", "للشراكات والاقتراحات والرسائل العامة."],
-    ["المعلومات والإعلام", "info@munjez-journey.com", "للاستفسارات الرسمية والمعلومات الإعلامية."],
-    ["الدعم", "support@munjez-journey.com", "للمساعدة المتعلقة بالحساب أو استخدام المنصة."],
+    ["مرحبًا وتعاون", helloEmail, "للشراكات والاقتراحات والرسائل العامة."],
+    ["المعلومات والإعلام", infoEmail, "للاستفسارات الرسمية والمعلومات الإعلامية."],
+    ["الدعم", supportEmail, "للمساعدة المتعلقة بالحساب أو استخدام المنصة."],
   ];
   return <PageFrame><PageIntro kicker="تواصل معنا" title="نسمع منك" description="اختر البريد الأقرب إلى موضوع رسالتك وسنرد عليك في أقرب وقت ممكن." /><section className="contact-grid shell">{contacts.map(([title,email,desc]) => <a href={`mailto:${email}`} key={email}><Mail size={24} /><h2>{title}</h2><p>{desc}</p><b dir="ltr">{email}</b></a>)}</section></PageFrame>;
 }
 
-export function AboutPage() {
-  return <PageFrame><PageIntro kicker="عن المشروع" title="رحلة تبدأ بخطوة صغيرة" description="رحلة مُنجِز مشروع عربي يساعد الإنسان على تنظيم حياته ورؤية تقدّمه والاحتفاء بما ينجزه." /><article className="prose-page shell"><h2>لماذا رحلة مُنجِز؟</h2><p>بدأت الفكرة من حاجة بسيطة: أداة عربية واضحة لا تزيد ضجيج يومنا، بل تجعل ما نريد إنجازه أقرب وأسهل في المتابعة.</p><h2>ما نؤمن به</h2><p>الاستمرارية أقوى من الحماس، وكل إنجاز يستحق أن يُرى ويوثّق ويُحتفى به، والإنسان العربي يستحق أداة مصممة له من الأصل.</p></article></PageFrame>;
+export function AboutPage({
+  heading1 = "لماذا رحلة مُنجِز؟",
+  paragraph1 = "بدأت الفكرة من حاجة بسيطة: أداة عربية واضحة لا تزيد ضجيج يومنا، بل تجعل ما نريد إنجازه أقرب وأسهل في المتابعة.",
+  heading2 = "ما نؤمن به",
+  paragraph2 = "الاستمرارية أقوى من الحماس، وكل إنجاز يستحق أن يُرى ويوثّق ويُحتفى به، والإنسان العربي يستحق أداة مصممة له من الأصل.",
+}: {
+  heading1?: string;
+  paragraph1?: string;
+  heading2?: string;
+  paragraph2?: string;
+}) {
+  return <PageFrame><PageIntro kicker="عن المشروع" title="رحلة تبدأ بخطوة صغيرة" description="رحلة مُنجِز مشروع عربي يساعد الإنسان على تنظيم حياته ورؤية تقدّمه والاحتفاء بما ينجزه." /><article className="prose-page shell"><h2>{heading1}</h2><p>{paragraph1}</p><h2>{heading2}</h2><p>{paragraph2}</p></article></PageFrame>;
 }
 
 export function FaqPage() {

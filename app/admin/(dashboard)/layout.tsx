@@ -7,10 +7,13 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { sections } from "../_lib/sections";
 
-const navItems = Object.values(sections).map((section) => ({
-  label: section.label,
-  href: section.basePath,
-}));
+const navItems = [
+  ...Object.values(sections).map((section) => ({
+    label: section.label,
+    href: section.basePath,
+  })),
+  { label: "الإعدادات العامة", href: "/admin/settings" },
+];
 
 export default function DashboardLayout({
   children,
