@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, RotateCw } from "lucide-react";
 
 const REWIND_SECONDS = 15;
-const FORWARD_SECONDS = 30;
+const FORWARD_SECONDS = 15;
 const SPEEDS = [1, 1.5, 2] as const;
 
 function formatTime(seconds: number): string {
@@ -24,6 +24,7 @@ export default function AudioPlayer({
   title: string;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const isSeekingRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -34,7 +35,12 @@ export default function AudioPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onTimeUpdate = () => {
+      // تجاهل تحديثات currentTime أثناء السحب الفعلي كي لا تتصارع مع
+      // موضع المؤشر الذي يحرّكه المستخدم (وإلا يُعاد المؤشر لموضع
+      // التشغيل الفعلي في كل مرة يُطلق فيها هذا الحدث أثناء السحب).
+      if (!isSeekingRef.current) setCurrentTime(audio.currentTime);
+    };
     const onLoadedMetadata = () => setDuration(audio.duration);
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
@@ -47,6 +53,15 @@ export default function AudioPlayer({
     audio.addEventListener("pause", onPause);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
+
+    // إن كان عنصر <audio> يحمل بيانات وصفية محمَّلة مسبقاً وقت تركيب
+    // المكوّن (مثلاً بعد إعادة تركيب من Fast Refresh أو استعادة من ذاكرة
+    // التصفح)، لن يُطلَق حدث loadedmetadata مجدداً، فتبقى حالة duration
+    // عالقة عند الصفر. نقرأ الحالة الفعلية مباشرة كإجراء احترازي.
+    if (audio.readyState >= 1) {
+      setDuration(audio.duration);
+      setCurrentTime(audio.currentTime);
+    }
 
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
@@ -89,6 +104,14 @@ export default function AudioPlayer({
     setCurrentTime(value);
   }
 
+  function handleSeekStart() {
+    isSeekingRef.current = true;
+  }
+
+  function handleSeekEnd() {
+    isSeekingRef.current = false;
+  }
+
   function handleSpeedChange(speed: number) {
     const audio = audioRef.current;
     if (!audio) return;
@@ -116,14 +139,14 @@ export default function AudioPlayer({
       <div className="audio-player-controls">
         <button type="button" className="audio-player-skip" onClick={() => skip(-REWIND_SECONDS)} aria-label={`الرجوع ${REWIND_SECONDS} ثانية`}>
           <RotateCcw size={24} />
-          <span>{REWIND_SECONDS}</span>
+          <span>-{REWIND_SECONDS}</span>
         </button>
         <button type="button" className="audio-player-play" onClick={togglePlay} aria-label={isPlaying ? "إيقاف" : "تشغيل"}>
           {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
         </button>
         <button type="button" className="audio-player-skip" onClick={() => skip(FORWARD_SECONDS)} aria-label={`التقديم ${FORWARD_SECONDS} ثانية`}>
           <RotateCw size={24} />
-          <span>{FORWARD_SECONDS}</span>
+          <span>+{FORWARD_SECONDS}</span>
         </button>
       </div>
 
@@ -137,6 +160,10 @@ export default function AudioPlayer({
           step={0.1}
           value={currentTime}
           onChange={handleSeek}
+          onMouseDown={handleSeekStart}
+          onTouchStart={handleSeekStart}
+          onMouseUp={handleSeekEnd}
+          onTouchEnd={handleSeekEnd}
           style={{ background: `linear-gradient(to right, var(--ink) ${progressPercent}%, var(--line) ${progressPercent}%)` }}
           aria-label="موضع التشغيل"
         />

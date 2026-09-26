@@ -621,8 +621,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .audio-player-skip:hover {
