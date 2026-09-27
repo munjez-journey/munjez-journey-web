@@ -7,15 +7,20 @@ import { usePathname } from "next/navigation";
 import { OptionalSignIn } from "@/components/account-access";
 import { createUserClient } from "@/lib/supabase/userClient";
 
-const DEFAULT_SOCIAL_LINKS = {
+type SocialLinks = { x: string; instagram: string; linkedin: string; tiktok: string };
+
+// احتياطي يُستخدم فقط إن فشل الاستعلام تماماً (مثل غياب الجدول نفسه)،
+// وليس لتعويض قيمة فارغة مقصودة في قاعدة البيانات — قيمة فارغة تعني
+// إخفاء الأيقونة، لا استبدالها برابط افتراضي.
+const FALLBACK_SOCIAL_LINKS: SocialLinks = {
   x: "https://x.com/munjez_journey",
   instagram: "https://www.instagram.com/munjez_journey/",
   linkedin: "https://www.linkedin.com/company/munjez-journey/",
   tiktok: "https://www.tiktok.com/@munjez_journey",
 };
 
-function useSocialLinks() {
-  const [links, setLinks] = useState(DEFAULT_SOCIAL_LINKS);
+function useSocialLinks(): SocialLinks | null {
+  const [links, setLinks] = useState<SocialLinks | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,17 +30,23 @@ function useSocialLinks() {
       .from("site_settings")
       .select("key, value")
       .in("key", ["social_x", "social_instagram", "social_linkedin", "social_tiktok"])
-      .then(({ data }) => {
-        if (cancelled || !data) return;
+      .then(({ data, error }) => {
+        if (cancelled) return;
+
+        if (error || !data) {
+          setLinks(FALLBACK_SOCIAL_LINKS);
+          return;
+        }
+
         const map: Record<string, string> = {};
         for (const row of data) {
-          if (row.value) map[row.key as string] = row.value as string;
+          map[row.key as string] = (row.value as string) ?? "";
         }
         setLinks({
-          x: map.social_x ?? DEFAULT_SOCIAL_LINKS.x,
-          instagram: map.social_instagram ?? DEFAULT_SOCIAL_LINKS.instagram,
-          linkedin: map.social_linkedin ?? DEFAULT_SOCIAL_LINKS.linkedin,
-          tiktok: map.social_tiktok ?? DEFAULT_SOCIAL_LINKS.tiktok,
+          x: map.social_x ?? "",
+          instagram: map.social_instagram ?? "",
+          linkedin: map.social_linkedin ?? "",
+          tiktok: map.social_tiktok ?? "",
         });
       });
 
@@ -130,10 +141,10 @@ export function SiteFooter() {
         <div className="footer-column"><strong>رحلة مُنجِز</strong><Link href="/#app">التطبيق</Link><Link href="/about">عن المشروع</Link><Link href="/contact">تواصل معنا</Link><Link href="/faq">الأسئلة الشائعة</Link></div>
         <div className="footer-column"><strong>قانوني</strong><Link href="/privacy">سياسة الخصوصية</Link><Link href="/terms">الشروط والأحكام</Link><Link href="/cookies">سياسة ملفات الارتباط</Link><Link href="/content-policy">سياسة المحتوى</Link></div>
         <div className="footer-social"><strong>تابع الرحلة</strong><div>
-          <a href={social.x} aria-label="X"><SocialIcon name="x" /></a>
-          <a href={social.instagram} aria-label="Instagram"><SocialIcon name="instagram" /></a>
-          <a href={social.linkedin} aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>
-          <a href={social.tiktok} aria-label="TikTok"><SocialIcon name="tiktok" /></a>
+          {social?.x && <a href={social.x} aria-label="X"><SocialIcon name="x" /></a>}
+          {social?.instagram && <a href={social.instagram} aria-label="Instagram"><SocialIcon name="instagram" /></a>}
+          {social?.linkedin && <a href={social.linkedin} aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>}
+          {social?.tiktok && <a href={social.tiktok} aria-label="TikTok"><SocialIcon name="tiktok" /></a>}
         </div></div>
       </div>
       <div className="shell footer-bottom"><span>© {new Date().getFullYear()} رحلة مُنجِز. جميع الحقوق محفوظة.</span></div>
@@ -148,10 +159,10 @@ export function MunjezFooter() {
       <div className="shell munjez-footer-row">
         <span className="munjez-copyright">© {new Date().getFullYear()} رحلة مُنجِز. جميع الحقوق محفوظة.</span>
         <div className="footer-social"><strong>تابع الرحلة</strong><div>
-          <a href={social.x} aria-label="X"><SocialIcon name="x" /></a>
-          <a href={social.instagram} aria-label="Instagram"><SocialIcon name="instagram" /></a>
-          <a href={social.linkedin} aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>
-          <a href={social.tiktok} aria-label="TikTok"><SocialIcon name="tiktok" /></a>
+          {social?.x && <a href={social.x} aria-label="X"><SocialIcon name="x" /></a>}
+          {social?.instagram && <a href={social.instagram} aria-label="Instagram"><SocialIcon name="instagram" /></a>}
+          {social?.linkedin && <a href={social.linkedin} aria-label="LinkedIn"><SocialIcon name="linkedin" /></a>}
+          {social?.tiktok && <a href={social.tiktok} aria-label="TikTok"><SocialIcon name="tiktok" /></a>}
         </div></div>
       </div>
     </footer>
