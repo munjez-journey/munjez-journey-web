@@ -175,16 +175,16 @@ export default async function Home() {
         <section className="section shell" id="podcast">
           <div className="section-heading"><div><span className="section-number">02</span><h2>استمع</h2></div><Link href="/podcast">جميع الحلقات <ArrowUpLeft size={16} /></Link></div>
           <div className="podcast-showcase">
-            <article className="podcast-episode-card">
+            <Link className="podcast-episode-card" href={`/podcast/${mainEpisode.id}`}>
               {mainEpisode.image_url && <img src={mainEpisode.image_url} alt={mainEpisode.title} />}
               <span className="podcast-episode-badge">الحلقة الجديدة</span>
               <span className="content-tag">{formatDate(mainEpisode.created_at)}</span>
               <h3>{mainEpisode.title}</h3>
               {mainEpisode.description && <p>{mainEpisode.description}</p>}
-              <Link className="play-button" href={`/podcast/${mainEpisode.id}`}>
+              <span className="play-button">
                 <Play size={18} fill="currentColor" /> استمع الآن
-              </Link>
-            </article>
+              </span>
+            </Link>
             <Link className="podcast-show-card" href="/podcast">
               {podcastShowImageUrl && <img src={podcastShowImageUrl} alt={podcastShowName} />}
               <Headphones size={30} strokeWidth={1.35} />
