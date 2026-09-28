@@ -39,6 +39,8 @@ const HOME_SETTINGS_KEYS = [
   "platform_point_1",
   "platform_point_2",
   "platform_point_3",
+  "podcast_show_name",
+  "podcast_show_image_url",
 ];
 
 export default async function Home() {
@@ -67,7 +69,7 @@ export default async function Home() {
       .select("id, title, description, image_url, created_at")
       .eq("is_published", true)
       .order("created_at", { ascending: false })
-      .limit(4),
+      .limit(1),
     supabase
       .from("news")
       .select("id, title, content, image_url, created_at")
@@ -86,7 +88,7 @@ export default async function Home() {
   const article = articleRows?.[0] ?? null;
   const champion = championRows?.[0] ?? null;
   const episodes = episodeRows ?? [];
-  const [mainEpisode, ...restEpisodes] = episodes;
+  const [mainEpisode] = episodes;
   const news = newsRows ?? [];
   const products = productRows ?? [];
 
@@ -108,6 +110,8 @@ export default async function Home() {
   const platformPoint1 = settings.platform_point_1 ?? "مهام اليوم والمهام القادمة";
   const platformPoint2 = settings.platform_point_2 ?? "عداد للتأخير والتقدّم";
   const platformPoint3 = settings.platform_point_3 ?? "أرشيف للمهام المكتملة";
+  const podcastShowName = settings.podcast_show_name ?? "بودكاست خُطوة";
+  const podcastShowImageUrl = settings.podcast_show_image_url || null;
 
   const articleReadingMinutes = article
     ? Math.max(1, Math.round((article.content ?? "").trim().split(/\s+/).filter(Boolean).length / 200))
@@ -170,34 +174,22 @@ export default async function Home() {
       {mainEpisode && (
         <section className="section shell" id="podcast">
           <div className="section-heading"><div><span className="section-number">02</span><h2>استمع</h2></div><Link href="/podcast">جميع الحلقات <ArrowUpLeft size={16} /></Link></div>
-          <div className="podcast-grid">
-            <article className="podcast-main">
-              <div className="podcast-art podcast-art-photo">
-                {mainEpisode.image_url && <img src={mainEpisode.image_url} alt={mainEpisode.title} />}
-                <span>بودكاست خُطوة</span>
-                <Headphones size={30} strokeWidth={1.35} />
-              </div>
-              <div className="podcast-info">
-                <span className="content-tag">{formatDate(mainEpisode.created_at)}</span>
-                <h3>{mainEpisode.title}</h3>
-                {mainEpisode.description && <p>{mainEpisode.description}</p>}
-                <Link className="play-button" href={`/podcast/${mainEpisode.id}`}>
-                  <Play size={18} fill="currentColor" /> استمع الآن
-                </Link>
-              </div>
+          <div className="podcast-showcase">
+            <article className="podcast-episode-card">
+              {mainEpisode.image_url && <img src={mainEpisode.image_url} alt={mainEpisode.title} />}
+              <span className="podcast-episode-badge">الحلقة الجديدة</span>
+              <span className="content-tag">{formatDate(mainEpisode.created_at)}</span>
+              <h3>{mainEpisode.title}</h3>
+              {mainEpisode.description && <p>{mainEpisode.description}</p>}
+              <Link className="play-button" href={`/podcast/${mainEpisode.id}`}>
+                <Play size={18} fill="currentColor" /> استمع الآن
+              </Link>
             </article>
-            {restEpisodes.length > 0 && (
-              <div className="episode-list">
-                {restEpisodes.map((episode, i) => (
-                  <Link href={`/podcast/${episode.id}`} key={episode.id}>
-                    {episode.image_url && <img src={episode.image_url} alt="" />}
-                    <span>{String(i + 2).padStart(2, "0")}</span>
-                    <div><small>{formatDate(episode.created_at)}</small><strong>{episode.title}</strong></div>
-                    <Play size={17} />
-                  </Link>
-                ))}
-              </div>
-            )}
+            <article className="podcast-show-card">
+              {podcastShowImageUrl && <img src={podcastShowImageUrl} alt={podcastShowName} />}
+              <Headphones size={30} strokeWidth={1.35} />
+              <span className="podcast-show-name">{podcastShowName}</span>
+            </article>
           </div>
         </section>
       )}

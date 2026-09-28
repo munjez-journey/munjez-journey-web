@@ -42,6 +42,17 @@ const GROUPS: GroupConfig[] = [
     ],
   },
   {
+    title: "الرئيسية — بطاقة البودكاست",
+    fields: [
+      { key: "podcast_show_name", label: "اسم البرنامج", placeholder: "بودكاست خُطوة" },
+      {
+        key: "podcast_show_image_url",
+        label: "الصورة الرسمية للبرنامج (بلا صورة = الشكل الحالي)",
+        image: true,
+      },
+    ],
+  },
+  {
     title: "صفحة المقالات — hero",
     fields: [
       { key: "articles_hero_title", label: "العنوان", placeholder: "أفكار تساعدك على التقدّم" },

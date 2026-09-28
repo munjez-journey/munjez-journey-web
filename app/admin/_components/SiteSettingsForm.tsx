@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import ImageUpload from "./ImageUpload";
 
-export type FieldConfig = { key: string; label: string; textarea?: boolean; placeholder?: string };
+export type FieldConfig = { key: string; label: string; textarea?: boolean; placeholder?: string; image?: boolean };
 export type GroupConfig = { title: string; fields: FieldConfig[] };
 
 export default function SiteSettingsForm({ pageTitle, groups }: { pageTitle: string; groups: GroupConfig[] }) {
@@ -82,7 +83,12 @@ export default function SiteSettingsForm({ pageTitle, groups }: { pageTitle: str
                   <label htmlFor={field.key} className="text-sm text-foreground">
                     {field.label}
                   </label>
-                  {field.textarea ? (
+                  {field.image ? (
+                    <ImageUpload
+                      value={values[field.key] ?? ""}
+                      onChange={(url) => setField(field.key, url)}
+                    />
+                  ) : field.textarea ? (
                     <textarea
                       id={field.key}
                       rows={4}
