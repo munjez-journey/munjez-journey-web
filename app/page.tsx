@@ -128,7 +128,7 @@ export default async function Home() {
             <span className="image-label">مقال الأسبوع</span>
           </Link>
           <article className="feature-copy">
-            <div className="eyebrow"><span>رحلة الإنجاز</span><span>{articleReadingMinutes} دقائق قراءة</span></div>
+            <div className="eyebrow"><span>{articleReadingMinutes} دقائق قراءة</span></div>
             <h1 id="feature-title">{article.title}</h1>
             <p className="feature-lead">{articleExcerpt}</p>
             <div className="article-meta">

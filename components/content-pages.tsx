@@ -36,9 +36,12 @@ export function ArticlesPage({
       {featured && (
         <Link className="editorial-card editorial-card-main" href={`/articles/${featured.id}`}>
           {featured.imageUrl && <div className="editorial-card-image"><img src={featured.imageUrl} alt={featured.title} /></div>}
-          <span>رحلة الإنجاز · {featured.readingMinutes} دقائق قراءة</span>
           <h2>{featured.title}</h2>
           <p>{featured.excerpt}</p>
+          <div className="editorial-card-meta">
+            <span>{featured.readingMinutes} دقائق قراءة</span>
+            <span>{featured.date}</span>
+          </div>
           <div className="editorial-card-actions">
             <b>اقرأ المقال <ArrowLeft size={18} /></b>
             <div className="card-actions-buttons">
@@ -51,9 +54,12 @@ export function ArticlesPage({
       {rest.map((article) => (
         <Link className="editorial-card" href={`/articles/${article.id}`} key={article.id}>
           {article.imageUrl && <div className="editorial-card-image"><img src={article.imageUrl} alt={article.title} /></div>}
-          <span>{article.date}</span>
           <h2>{article.title}</h2>
           <p>{article.excerpt}</p>
+          <div className="editorial-card-meta">
+            <span>{article.readingMinutes} دقائق قراءة</span>
+            <span>{article.date}</span>
+          </div>
           <div className="editorial-card-actions">
             <b>اقرأ المقال <ArrowLeft size={18} /></b>
             <div className="card-actions-buttons">
