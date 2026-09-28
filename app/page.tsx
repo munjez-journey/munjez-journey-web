@@ -185,11 +185,11 @@ export default async function Home() {
                 <Play size={18} fill="currentColor" /> استمع الآن
               </Link>
             </article>
-            <article className="podcast-show-card">
+            <Link className="podcast-show-card" href="/podcast">
               {podcastShowImageUrl && <img src={podcastShowImageUrl} alt={podcastShowName} />}
               <Headphones size={30} strokeWidth={1.35} />
               <span className="podcast-show-name">{podcastShowName}</span>
-            </article>
+            </Link>
           </div>
         </section>
       )}
