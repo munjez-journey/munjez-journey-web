@@ -7,11 +7,22 @@ export const metadata: Metadata = { title: "بودكاست خُطوة | رحلة
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const { data } = await supabase
-    .from("podcast_episodes")
-    .select("id, title, description, image_url, created_at")
-    .eq("is_published", true)
-    .order("created_at", { ascending: false });
+  const [{ data }, { data: settingsRows }] = await Promise.all([
+    supabase
+      .from("podcast_episodes")
+      .select("id, title, description, image_url, created_at")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["podcast_hero_title", "podcast_hero_description"]),
+  ]);
+
+  const settings: Record<string, string> = {};
+  for (const row of settingsRows ?? []) {
+    if (row.value) settings[row.key as string] = row.value as string;
+  }
 
   const episodes = (data ?? []).map((item) => ({
     id: item.id as number,
@@ -38,5 +49,15 @@ export default async function Page() {
     }
   }
 
-  return <PodcastPage episodes={episodes} likeCounts={likeCounts} />;
+  return (
+    <PodcastPage
+      episodes={episodes}
+      likeCounts={likeCounts}
+      heroTitle={settings.podcast_hero_title ?? "حديث هادئ عن الاستمرار"}
+      heroDescription={
+        settings.podcast_hero_description ??
+        "حلقات قصيرة وعملية تساعدك على تجاوز التعثر والعودة إلى خطوتك التالية."
+      }
+    />
+  );
 }

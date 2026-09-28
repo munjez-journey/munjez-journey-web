@@ -22,11 +22,22 @@ function excerptFromMarkdown(content: string, maxLength = 140): string {
 }
 
 export default async function Page() {
-  const { data } = await supabase
-    .from("news")
-    .select("id, title, content, image_url, created_at")
-    .eq("is_published", true)
-    .order("created_at", { ascending: false });
+  const [{ data }, { data: settingsRows }] = await Promise.all([
+    supabase
+      .from("news")
+      .select("id, title, content, image_url, created_at")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["news_hero_title", "news_hero_description"]),
+  ]);
+
+  const settings: Record<string, string> = {};
+  for (const row of settingsRows ?? []) {
+    if (row.value) settings[row.key as string] = row.value as string;
+  }
 
   const news = (data ?? []).map((item) => ({
     id: item.id as number,
@@ -53,5 +64,12 @@ export default async function Page() {
     }
   }
 
-  return <NewsPage news={news} likeCounts={likeCounts} />;
+  return (
+    <NewsPage
+      news={news}
+      likeCounts={likeCounts}
+      heroTitle={settings.news_hero_title ?? "ما يحدث في رحلة مُنجِز"}
+      heroDescription={settings.news_hero_description ?? "آخر تحديثات المنصة والمنتجات والمحتوى الجديد."}
+    />
+  );
 }

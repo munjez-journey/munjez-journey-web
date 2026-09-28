@@ -75,10 +75,39 @@ export function HourglassMark({ compact = false }: { compact?: boolean }) {
   );
 }
 
+const JOURNEY_BUTTON_LABEL_FALLBACK = "إدارة المهام";
+
+function useJourneyButtonLabel(): string {
+  const [label, setLabel] = useState(JOURNEY_BUTTON_LABEL_FALLBACK);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createUserClient();
+
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "journey_button_label")
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.value) return;
+        setLabel(data.value as string);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return label;
+}
+
 export function JourneyAccess({ compact = false }: { compact?: boolean }) {
+  const label = useJourneyButtonLabel();
   return (
     <Link className={compact ? "journey-button compact-button" : "journey-button"} href="/tasks">
-      إدارة المهام
+      {label}
       {!compact && <ArrowUpLeft size={17} strokeWidth={1.8} />}
     </Link>
   );

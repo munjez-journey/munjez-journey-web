@@ -15,13 +15,24 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ChampionsPage() {
-  const { data } = await supabase
-    .from("champions")
-    .select("id, slug, name, tag, short_description, image_url")
-    .eq("is_published", true)
-    .order("created_at", { ascending: false });
+  const [{ data }, { data: settingsRows }] = await Promise.all([
+    supabase
+      .from("champions")
+      .select("id, slug, name, tag, short_description, image_url")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["champions_hero_title", "champions_hero_description"]),
+  ]);
 
   const champions = data ?? [];
+
+  const settings: Record<string, string> = {};
+  for (const row of settingsRows ?? []) {
+    if (row.value) settings[row.key as string] = row.value as string;
+  }
 
   const championIds = champions.map((champion) => champion.id as number);
   const likeCounts: Record<number, number> = {};
@@ -37,7 +48,14 @@ export default async function ChampionsPage() {
   }
 
   return <PageFrame>
-    <PageIntro kicker="أبطال الرحلة" title="أشخاص عاديون، رحلات تستحق أن تُروى" description="نشارك تجارب أشخاص لم يبدأوا بظروف مثالية، لكنهم وجدوا خطوتهم التالية واستمروا." />
+    <PageIntro
+      kicker="أبطال الرحلة"
+      title={settings.champions_hero_title ?? "أشخاص عاديون، رحلات تستحق أن تُروى"}
+      description={
+        settings.champions_hero_description ??
+        "نشارك تجارب أشخاص لم يبدأوا بظروف مثالية، لكنهم وجدوا خطوتهم التالية واستمروا."
+      }
+    />
     <section className="champions-list shell">
       {champions.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد قصص منشورة بعد.</p>}
       {champions.map((champion) => (

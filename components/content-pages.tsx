@@ -20,13 +20,17 @@ type DbArticleSummary = {
 export function ArticlesPage({
   articles = [],
   likeCounts = {},
+  heroTitle = "أفكار تساعدك على التقدّم",
+  heroDescription = "نكتب عن الاستمرارية، تنظيم الوقت، وبناء إنجازات صغيرة يمكن رؤيتها والاحتفاء بها.",
 }: {
   articles?: DbArticleSummary[];
   likeCounts?: Record<number, number>;
+  heroTitle?: string;
+  heroDescription?: string;
 }) {
   const [featured, ...rest] = articles;
 
-  return <PageFrame><PageIntro kicker="المقالات" title="أفكار تساعدك على التقدّم" description="نكتب عن الاستمرارية، تنظيم الوقت، وبناء إنجازات صغيرة يمكن رؤيتها والاحتفاء بها." />
+  return <PageFrame><PageIntro kicker="المقالات" title={heroTitle} description={heroDescription} />
     <section className="listing-grid shell">
       {articles.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد مقالات منشورة بعد.</p>}
       {featured && (
@@ -74,12 +78,16 @@ type DbEpisodeSummary = {
 export function PodcastPage({
   episodes = [],
   likeCounts = {},
+  heroTitle = "حديث هادئ عن الاستمرار",
+  heroDescription = "حلقات قصيرة وعملية تساعدك على تجاوز التعثر والعودة إلى خطوتك التالية.",
 }: {
   episodes?: DbEpisodeSummary[];
   likeCounts?: Record<number, number>;
+  heroTitle?: string;
+  heroDescription?: string;
 }) {
   const [latest, ...rest] = episodes;
-  return <PageFrame><PageIntro kicker="بودكاست خُطوة" title="حديث هادئ عن الاستمرار" description="حلقات قصيرة وعملية تساعدك على تجاوز التعثر والعودة إلى خطوتك التالية." />
+  return <PageFrame><PageIntro kicker="بودكاست خُطوة" title={heroTitle} description={heroDescription} />
     <section className="episode-catalog shell">
       {episodes.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد حلقات منشورة بعد.</p>}
       {latest && (
@@ -136,11 +144,15 @@ type DbNewsSummary = {
 export function NewsPage({
   news = [],
   likeCounts = {},
+  heroTitle = "ما يحدث في رحلة مُنجِز",
+  heroDescription = "آخر تحديثات المنصة والمنتجات والمحتوى الجديد.",
 }: {
   news?: DbNewsSummary[];
   likeCounts?: Record<number, number>;
+  heroTitle?: string;
+  heroDescription?: string;
 }) {
-  return <PageFrame><PageIntro kicker="الأخبار" title="ما يحدث في رحلة مُنجِز" description="آخر تحديثات المنصة والمنتجات والمحتوى الجديد." />
+  return <PageFrame><PageIntro kicker="الأخبار" title={heroTitle} description={heroDescription} />
     <section className="news-list shell">
       {news.length === 0 && <p style={{ padding: "40px 0", color: "var(--muted)" }}>لا توجد أخبار منشورة بعد.</p>}
       {news.map((item) => (
@@ -173,13 +185,18 @@ type DbProductSummary = {
   imageUrl: string | null;
 };
 
-export function StorePage({ products = [] }: { products?: DbProductSummary[] }) {
-  const description =
-    products.length === 0
-      ? "منتجات صُممت لترافق رحلتك اليومية. المتجر قيد التجهيز وسيُفتح قريبًا."
-      : "منتجات صُممت لترافق رحلتك اليومية.";
+export function StorePage({
+  products = [],
+  heroTitle = "أدوات تجعل الإنجاز ملموسًا",
+  heroEmptyDescription = "منتجات صُممت لترافق رحلتك اليومية. المتجر قيد التجهيز وسيُفتح قريباً.",
+}: {
+  products?: DbProductSummary[];
+  heroTitle?: string;
+  heroEmptyDescription?: string;
+}) {
+  const description = products.length === 0 ? heroEmptyDescription : "منتجات صُممت لترافق رحلتك اليومية.";
 
-  return <PageFrame><PageIntro kicker="المتجر" title="أدوات تجعل الإنجاز ملموسًا" description={description} />
+  return <PageFrame><PageIntro kicker="المتجر" title={heroTitle} description={description} />
     {products.length > 0 && (
       <section className="store-grid store-page-grid shell">
         {products.map((product) => (

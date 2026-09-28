@@ -22,11 +22,22 @@ function excerptFromMarkdown(content: string, maxLength = 140): string {
 }
 
 export default async function Page() {
-  const { data } = await supabase
-    .from("articles")
-    .select("id, title, description, content, image_url, created_at")
-    .eq("is_published", true)
-    .order("created_at", { ascending: false });
+  const [{ data }, { data: settingsRows }] = await Promise.all([
+    supabase
+      .from("articles")
+      .select("id, title, description, content, image_url, created_at")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["articles_hero_title", "articles_hero_description"]),
+  ]);
+
+  const settings: Record<string, string> = {};
+  for (const row of settingsRows ?? []) {
+    if (row.value) settings[row.key as string] = row.value as string;
+  }
 
   const articles = (data ?? []).map((article) => {
     const wordCount = ((article.content as string) ?? "").trim().split(/\s+/).filter(Boolean).length;
@@ -59,5 +70,15 @@ export default async function Page() {
     }
   }
 
-  return <ArticlesPage articles={articles} likeCounts={likeCounts} />;
+  return (
+    <ArticlesPage
+      articles={articles}
+      likeCounts={likeCounts}
+      heroTitle={settings.articles_hero_title ?? "أفكار تساعدك على التقدّم"}
+      heroDescription={
+        settings.articles_hero_description ??
+        "نكتب عن الاستمرارية، تنظيم الوقت، وبناء إنجازات صغيرة يمكن رؤيتها والاحتفاء بها."
+      }
+    />
+  );
 }

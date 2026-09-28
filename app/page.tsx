@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpLeft, Headphones, Play, ShoppingBag } from "lucide-react";
@@ -29,6 +30,17 @@ function formatDate(value: string) {
   });
 }
 
+const HOME_SETTINGS_KEYS = [
+  "home_hero_title",
+  "home_hero_side_text",
+  "platform_badge",
+  "platform_title",
+  "platform_description",
+  "platform_point_1",
+  "platform_point_2",
+  "platform_point_3",
+];
+
 export default async function Home() {
   const [
     { data: articleRows },
@@ -36,6 +48,7 @@ export default async function Home() {
     { data: episodeRows },
     { data: newsRows },
     { data: productRows },
+    { data: settingsRows },
   ] = await Promise.all([
     supabase
       .from("articles")
@@ -67,6 +80,7 @@ export default async function Home() {
       .eq("is_published", true)
       .order("created_at", { ascending: false })
       .limit(2),
+    supabase.from("site_settings").select("key, value").in("key", HOME_SETTINGS_KEYS),
   ]);
 
   const article = articleRows?.[0] ?? null;
@@ -75,6 +89,25 @@ export default async function Home() {
   const [mainEpisode, ...restEpisodes] = episodes;
   const news = newsRows ?? [];
   const products = productRows ?? [];
+
+  const settings: Record<string, string> = {};
+  for (const row of settingsRows ?? []) {
+    if (row.value) settings[row.key as string] = row.value as string;
+  }
+
+  const heroTitleLines = (
+    settings.home_hero_title ?? "وما النجاح إلا\nإنجازات صغيرة."
+  ).split("\n");
+  const heroSubtitle =
+    settings.home_hero_side_text ?? "نكتب ونصنع أدوات تساعدك على التقدّم بهدوء، خطوة بعد خطوة.";
+  const platformBadge = settings.platform_badge ?? "تجربة أولية — التطبيق الكامل قريباً";
+  const platformTitle = settings.platform_title ?? "مهامك اليومية، في مكان واضح";
+  const platformSubtitle =
+    settings.platform_description ??
+    "مساحة عربية مخصصة لإدارة المهام فقط: أضف ما تريد إنجازه، رتّب يومك، وتابع ما اكتمل دون تعقيد.";
+  const platformPoint1 = settings.platform_point_1 ?? "مهام اليوم والمهام القادمة";
+  const platformPoint2 = settings.platform_point_2 ?? "عداد للتأخير والتقدّم";
+  const platformPoint3 = settings.platform_point_3 ?? "أرشيف للمهام المكتملة";
 
   const articleReadingMinutes = article
     ? Math.max(1, Math.round((article.content ?? "").trim().split(/\s+/).filter(Boolean).length / 200))
@@ -107,8 +140,16 @@ export default async function Home() {
       )}
 
       <section className="manifesto shell" aria-label="فلسفة رحلة منجز">
-        <p>رحلة مُنجِز</p><h2>وما النجاح إلا<br />إنجازات صغيرة.</h2>
-        <p className="manifesto-note">نكتب ونصنع أدوات تساعدك على التقدّم بهدوء، خطوة بعد خطوة.</p>
+        <p>رحلة مُنجِز</p>
+        <h2>
+          {heroTitleLines.map((line, i) => (
+            <Fragment key={i}>
+              {line}
+              {i < heroTitleLines.length - 1 && <br />}
+            </Fragment>
+          ))}
+        </h2>
+        <p className="manifesto-note">{heroSubtitle}</p>
       </section>
 
       {champion && (
@@ -208,7 +249,7 @@ export default async function Home() {
       <section className="app-cta" id="app">
         <div className="shell app-cta-inner">
           <div className="app-symbol"><img src="/hourglass-logo.png" alt="شعار رحلة مُنجِز" width="72" height="94" /></div>
-          <div className="app-copy"><span>تجربة أولية — التطبيق الكامل قريبًا</span><h2>مهامك اليومية، في مكان واضح</h2><p>مساحة عربية مخصصة لإدارة المهام فقط: أضف ما تريد إنجازه، رتّب يومك، وتابع ما اكتمل دون تعقيد.</p><div className="app-keywords"><span>مهام اليوم والمهام القادمة</span><span>عداد للتأخير والتقدّم</span><span>أرشيف للمهام المكتملة</span></div></div>
+          <div className="app-copy"><span>{platformBadge}</span><h2>{platformTitle}</h2><p>{platformSubtitle}</p><div className="app-keywords"><span>{platformPoint1}</span><span>{platformPoint2}</span><span>{platformPoint3}</span></div></div>
           <JourneyAccess compact />
         </div>
       </section>

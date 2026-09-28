@@ -12,6 +12,7 @@ const navItems = [
     label: section.label,
     href: section.basePath,
   })),
+  { label: "نصوص الصفحات الثابتة", href: "/admin/home" },
   { label: "الإعدادات العامة", href: "/admin/settings" },
 ];
 
