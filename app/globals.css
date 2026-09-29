@@ -1641,16 +1641,36 @@ a {
   line-height: 1.7;
 }
 
-.newsletter form {
+.newsletter-form {
   display: flex;
-  min-height: 50px;
-  border-bottom: 1px solid var(--ink);
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.newsletter-fields {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 16px;
+}
+
+.newsletter-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.newsletter-field:first-child {
+  flex: 0.7;
 }
 
 .newsletter input {
   min-width: 0;
-  flex: 1;
+  width: 100%;
+  min-height: 50px;
   border: 0;
+  border-bottom: 1px solid var(--ink);
   outline: 0;
   background: transparent;
   color: var(--ink);
@@ -1660,8 +1680,27 @@ a {
   color: #8d8d88;
 }
 
-.newsletter button {
+.newsletter-error {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #b3261e;
+}
+
+.newsletter-error-general {
+  margin-top: 12px;
+}
+
+.newsletter-success {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.newsletter-form > button {
+  flex-shrink: 0;
+  min-height: 50px;
   border: 0;
+  border-bottom: 1px solid var(--ink);
   background: transparent;
   font-weight: 600;
   cursor: pointer;
@@ -2037,6 +2076,25 @@ a {
     grid-template-columns: 1fr;
     gap: 20px;
     padding-block: 44px;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .newsletter-fields {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .newsletter-field:first-child {
+    flex: 1;
+  }
+
+  .newsletter-form > button {
+    align-self: flex-start;
   }
 
   .footer-top {

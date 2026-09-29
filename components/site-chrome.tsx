@@ -6,6 +6,7 @@ import { ArrowUpLeft, Mail, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { OptionalSignIn } from "@/components/account-access";
 import { createUserClient } from "@/lib/supabase/userClient";
+import { createPublicClient } from "@/lib/supabase/publicClient";
 
 type SocialLinks = { x: string; instagram: string; linkedin: string; tiktok: string };
 
@@ -148,15 +149,93 @@ export function SiteHeader() {
   );
 }
 
+type NewsletterStatus = "idle" | "submitting" | "success" | "error";
+
 export function Newsletter() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [status, setStatus] = useState<NewsletterStatus>("idle");
+
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+
+    const nextErrors: { name?: string; email?: string } = {};
+    if (!name.trim()) nextErrors.name = "الاسم مطلوب";
+    if (!email.trim()) {
+      nextErrors.email = "البريد الإلكتروني مطلوب";
+    } else if (!isValidEmail(email.trim())) {
+      nextErrors.email = "صيغة البريد الإلكتروني غير صحيحة";
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setStatus("submitting");
+    const supabase = createPublicClient();
+    const { error } = await supabase.rpc("subscribe_to_newsletter", {
+      p_first_name: name.trim(),
+      p_email: email.trim(),
+    });
+
+    if (error) {
+      setStatus("error");
+      return;
+    }
+
+    setStatus("success");
+    setName("");
+    setEmail("");
+  }
+
+  if (status === "success") {
+    return (
+      <section className="newsletter shell">
+        <div><Mail size={22} /><h2>رسالة صغيرة كل أسبوع</h2></div>
+        <p className="newsletter-success">تم. أنت الآن ضمن الرسالة الأسبوعية.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="newsletter shell">
       <div><Mail size={22} /><h2>رسالة صغيرة كل أسبوع</h2></div>
       <p>مقال، فكرة، وخطوة عملية تصل إلى بريدك دون ضجيج.</p>
-      <form onSubmit={(event) => event.preventDefault()}>
-        <input type="email" placeholder="البريد الإلكتروني" aria-label="البريد الإلكتروني" />
-        <button type="submit">اشترك</button>
+      <form className="newsletter-form" onSubmit={handleSubmit} noValidate>
+        <div className="newsletter-fields">
+          <div className="newsletter-field">
+            <input
+              type="text"
+              placeholder="الاسم الأول"
+              aria-label="الاسم الأول"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              disabled={status === "submitting"}
+            />
+            {errors.name && <span className="newsletter-error">{errors.name}</span>}
+          </div>
+          <div className="newsletter-field">
+            <input
+              type="email"
+              placeholder="البريد الإلكتروني"
+              aria-label="البريد الإلكتروني"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={status === "submitting"}
+            />
+            {errors.email && <span className="newsletter-error">{errors.email}</span>}
+          </div>
+        </div>
+        <button type="submit" disabled={status === "submitting"}>
+          {status === "submitting" ? "جارٍ الاشتراك…" : "اشترك"}
+        </button>
       </form>
+      {status === "error" && (
+        <span className="newsletter-error newsletter-error-general">
+          تعذّر إتمام الاشتراك، حاول مرة أخرى.
+        </span>
+      )}
     </section>
   );
 }
