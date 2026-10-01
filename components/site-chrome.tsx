@@ -6,7 +6,7 @@ import { ArrowUpLeft, Mail, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { OptionalSignIn } from "@/components/account-access";
 import { createUserClient } from "@/lib/supabase/userClient";
-import { createPublicClient } from "@/lib/supabase/publicClient";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
 
 type SocialLinks = { x: string; instagram: string; linkedin: string; tiktok: string };
 
@@ -173,13 +173,9 @@ export function Newsletter() {
     if (Object.keys(nextErrors).length > 0) return;
 
     setStatus("submitting");
-    const supabase = createPublicClient();
-    const { error } = await supabase.rpc("subscribe_to_newsletter", {
-      p_first_name: name.trim(),
-      p_email: email.trim(),
-    });
+    const result = await subscribeToNewsletter(name.trim(), email.trim());
 
-    if (error) {
+    if (!result.ok) {
       setStatus("error");
       return;
     }
