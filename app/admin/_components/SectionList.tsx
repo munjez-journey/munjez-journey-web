@@ -58,7 +58,7 @@ export default function SectionList({ section }: { section: SectionConfig }) {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-foreground">
           {section.label}
         </h1>
@@ -70,7 +70,7 @@ export default function SectionList({ section }: { section: SectionConfig }) {
         </Link>
       </div>
 
-      <div className="overflow-hidden border border-border bg-card shadow-sm">
+      <div className="overflow-x-auto border border-border bg-card shadow-sm">
         {loading && (
           <p className="p-10 text-center text-muted-foreground">
             جارٍ التحميل...
@@ -93,7 +93,7 @@ export default function SectionList({ section }: { section: SectionConfig }) {
         )}
 
         {!loading && !error && rows.length > 0 && (
-          <table className="w-full border-collapse text-right">
+          <table className="w-full min-w-[34rem] border-collapse text-right">
             <thead>
               <tr className="border-b border-border bg-secondary/60 text-sm text-muted-foreground">
                 <th className="px-5 py-3 font-medium">العنوان</th>
@@ -123,7 +123,7 @@ export default function SectionList({ section }: { section: SectionConfig }) {
                     {new Date(row.created_at).toLocaleDateString("ar-EG")}
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 whitespace-nowrap">
                       <Link
                         href={`${section.basePath}/${row.id}/edit`}
                         className="border border-border px-3 py-1.5 text-sm text-foreground transition-opacity hover:opacity-70"

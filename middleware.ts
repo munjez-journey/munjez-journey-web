@@ -25,32 +25,54 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = "/admin/login";
+  loginUrl.search = "";
 
   const isLoginPage = request.nextUrl.pathname === "/admin/login";
 
-  if (!user && !isLoginPage) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/admin/login";
+  // محاولتان بالضبط: أي فشل غير واضح (شبكة/timeout) لا يُعامَل كـ "غير مصرَّح".
+  // لا نُعيد التوجيه لصفحة الدخول إلا بردّ صريح: لا جلسة، أو الحساب ليس أدمن.
+  // عند فشل التحقق مرتين نُمرّر الطلب، وlayout.tsx يعرض رسالة "تعذر التحقق"
+  // مع زر إعادة المحاولة (والبيانات نفسها محمية بـ RLS في Supabase).
+  let user = null;
+  let userVerdict: "ok" | "no-session" | "unknown" = "unknown";
+  for (let attempt = 0; attempt < 2 && userVerdict === "unknown"; attempt++) {
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (data.user) {
+        user = data.user;
+        userVerdict = "ok";
+      } else if (!error || error.name === "AuthSessionMissingError" || error.status === 401 || error.status === 403) {
+        userVerdict = "no-session";
+      }
+    } catch {
+      // خطأ شبكة — نعيد المحاولة
+    }
+  }
+
+  if (userVerdict === "no-session" && !isLoginPage) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // فحص الدور الخادمي — مبدأ الفشل المغلق: أي خطأ أو غياب صفّ أو دور غير
-  // "admin" يُعامَل كغير مصرَّح، لا كسماح افتراضي.
   if (user && !isLoginPage) {
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+    let isAdmin: boolean | null = null; // null = لم نتأكد
+    for (let attempt = 0; attempt < 2 && isAdmin === null; attempt++) {
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (!profileError) {
+          isAdmin = profile?.role === "admin"; // لا صفّ = ليس أدمن (ردّ صريح)
+        }
+      } catch {
+        // خطأ شبكة — نعيد المحاولة
+      }
+    }
 
-    const isAdmin = !profileError && profile?.role === "admin";
-
-    if (!isAdmin) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/admin/login";
+    if (isAdmin === false) {
       loginUrl.search = "?error=unauthorized";
       return NextResponse.redirect(loginUrl);
     }
