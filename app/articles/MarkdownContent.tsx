@@ -1,7 +1,13 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export default function MarkdownContent({ content }: { content: string }) {
+export default function MarkdownContent({
+  content,
+  highlightFirst = true,
+}: {
+  content: string;
+  highlightFirst?: boolean;
+}) {
   let paragraphCount = 0;
 
   return (
@@ -11,7 +17,11 @@ export default function MarkdownContent({ content }: { content: string }) {
         p: ({ children }) => {
           paragraphCount += 1;
           return (
-            <p className={paragraphCount === 1 ? "article-opening" : undefined}>
+            <p
+              className={
+                highlightFirst && paragraphCount === 1 ? "article-opening" : undefined
+              }
+            >
               {children}
             </p>
           );

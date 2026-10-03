@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { SectionConfig } from "../_lib/sections";
+import MarkdownContent from "@/app/articles/MarkdownContent";
+import { normalizeSpacing } from "@/lib/articleSpacing";
 import ImageUpload from "./ImageUpload";
 
 type Values = Record<string, string | boolean>;
@@ -16,7 +18,11 @@ function buildInitialValues(
   for (const field of fields) {
     const existing = initialValues?.[field.name];
     if (field.type === "checkbox") {
-      values[field.name] = Boolean(existing ?? false);
+      values[field.name] = Boolean(
+        existing ?? (field.defaultChecked ?? false)
+      );
+    } else if (field.type === "select") {
+      values[field.name] = (existing as string) || field.defaultValue;
     } else if (field.type === "number") {
       values[field.name] = existing != null ? String(existing) : "";
     } else {
@@ -100,6 +106,28 @@ export default function SectionForm({
           );
         }
 
+        if (field.type === "select") {
+          return (
+            <div key={field.name} className="flex flex-col gap-1.5">
+              <label htmlFor={field.name} className="text-sm text-foreground">
+                {field.label}
+              </label>
+              <select
+                id={field.name}
+                value={values[field.name] as string}
+                onChange={(e) => setField(field.name, e.target.value)}
+                className="border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-foreground"
+              >
+                {field.options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        }
+
         if (field.type === "textarea") {
           return (
             <div key={field.name} className="flex flex-col gap-1.5">
@@ -117,6 +145,20 @@ export default function SectionForm({
                 onChange={(e) => setField(field.name, e.target.value)}
                 className="resize-y border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-foreground"
               />
+              {section.articlePreview && field.name === "content" && (
+                <div className="mt-3 flex flex-col gap-1.5">
+                  <span className="text-sm text-foreground">معاينة حيّة</span>
+                  <div
+                    className="article-body article-preview border border-border p-4"
+                    data-spacing={normalizeSpacing(values.paragraph_spacing)}
+                  >
+                    <MarkdownContent
+                      content={(values.content as string) || "ابدأ الكتابة لتظهر المعاينة هنا."}
+                      highlightFirst={values.highlight_first_paragraph !== false}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           );
         }
