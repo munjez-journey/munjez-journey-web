@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { PageFrame } from "@/components/site-chrome";
 import { supabase } from "@/lib/supabaseClient";
 import MarkdownContent from "../MarkdownContent";
+import { normalizeSpacing } from "@/lib/articleSpacing";
 import LikeButton from "../LikeButton";
 import BookmarkButton from "../BookmarkButton";
 
@@ -19,9 +20,7 @@ export default async function DynamicArticlePage({
 
   const { data: article, error } = await supabase
     .from("articles")
-    .select(
-      "id, title, description, content, image_url, author, is_published, created_at"
-    )
+    .select("*")
     .eq("id", id)
     .eq("is_published", true)
     .single();
@@ -80,8 +79,14 @@ export default async function DynamicArticlePage({
           </div>
         )}
 
-        <div className="article-body">
-          <MarkdownContent content={article.content ?? ""} />
+        <div
+          className="article-body"
+          data-spacing={normalizeSpacing(article.paragraph_spacing)}
+        >
+          <MarkdownContent
+            content={article.content ?? ""}
+            highlightFirst={article.highlight_first_paragraph !== false}
+          />
         </div>
       </article>
     </PageFrame>

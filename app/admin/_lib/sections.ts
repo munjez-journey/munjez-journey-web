@@ -1,3 +1,5 @@
+import { PARAGRAPH_SPACING_OPTIONS } from "@/lib/articleSpacing";
+
 export type FieldConfig =
   | {
       name: string;
@@ -16,7 +18,14 @@ export type FieldConfig =
       hint?: string;
     }
   | { name: string; label: string; type: "number"; required?: boolean }
-  | { name: string; label: string; type: "checkbox" }
+  | { name: string; label: string; type: "checkbox"; defaultChecked?: boolean }
+  | {
+      name: string;
+      label: string;
+      type: "select";
+      options: readonly { value: string; label: string }[];
+      defaultValue: string;
+    }
   | { name: string; label: string; type: "image" };
 
 export type SectionConfig = {
@@ -28,6 +37,7 @@ export type SectionConfig = {
   addLabel: string;
   titleField: string;
   fields: FieldConfig[];
+  articlePreview?: boolean;
 };
 
 export const sections: Record<string, SectionConfig> = {
@@ -39,6 +49,7 @@ export const sections: Record<string, SectionConfig> = {
     singularLabel: "مقال",
     addLabel: "إضافة مقال جديد",
     titleField: "title",
+    articlePreview: true,
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       {
@@ -60,7 +71,20 @@ export const sections: Record<string, SectionConfig> = {
         type: "textarea",
         required: true,
         rows: 10,
-        hint: "يدعم صيغة Markdown: ## لعنوان فرعي، **عريض** للنص العريض، > للاقتباس، واترك سطراً فارغاً بين الفقرات. تجنّب استخدام ### لأنه غير منسّق في الموقع.",
+        hint: "يدعم صيغة Markdown: ## لعنوان فرعي، **عريض** للنص العريض، > للاقتباس، واترك سطراً فارغاً بين الفقرات. تجنّب استخدام ### لأنه غير منسّق في الموقع. +++ في سطر وحده لإضافة مسافة إضافية بعد الفقرة.",
+      },
+      {
+        name: "paragraph_spacing",
+        label: "المسافة بين الفقرات",
+        type: "select",
+        options: PARAGRAPH_SPACING_OPTIONS,
+        defaultValue: "normal",
+      },
+      {
+        name: "highlight_first_paragraph",
+        label: "إبراز الفقرة الأولى (خط أكبر وأعرض)",
+        type: "checkbox",
+        defaultChecked: true,
       },
       { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر المقال؟", type: "checkbox" },
