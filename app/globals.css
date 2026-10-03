@@ -764,8 +764,17 @@
   background: var(--paper);
 }
 
+.article-body {
+  --paragraph-extra-gap: calc(var(--paragraph-gap) * 1.2);
+}
+
 .article-body p {
   margin: 0 0 var(--paragraph-gap);
+}
+
+.article-body .article-spacer {
+  height: var(--paragraph-extra-gap);
+  font-size: 1.08rem;
 }
 
 .article-body > :last-child,
