@@ -26,7 +26,8 @@ export type FieldConfig =
       options: readonly { value: string; label: string }[];
       defaultValue: string;
     }
-  | { name: string; label: string; type: "image" };
+  | { name: string; label: string; type: "image" }
+  | { name: string; label: string; type: "audio" };
 
 export type SectionConfig = {
   key: string;
@@ -107,7 +108,7 @@ export const sections: Record<string, SectionConfig> = {
         required: true,
         rows: 6,
       },
-      { name: "audio_url", label: "رابط الصوت", type: "text", dir: "ltr" },
+      { name: "audio_url", label: "الملف الصوتي للحلقة", type: "audio" },
       { name: "image_url", label: "الصورة", type: "image" },
       { name: "is_published", label: "نشر الحلقة؟", type: "checkbox" },
     ],
