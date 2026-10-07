@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { deleteStoredAudioIfUnused } from "@/lib/podcastAudio";
 import type { SectionConfig } from "../_lib/sections";
 
 type Row = {
@@ -46,11 +47,26 @@ export default function SectionList({ section }: { section: SectionConfig }) {
     if (!confirmed) return;
 
     const supabase = createClient();
-    const { error } = await supabase.from(section.table).delete().eq("id", id);
+    const audioField = section.fields.find((f) => f.type === "audio");
+    const { data: deleted, error } = await supabase
+      .from(section.table)
+      .delete()
+      .eq("id", id)
+      .select<string, Record<string, unknown>>(audioField ? audioField.name : "id");
 
     if (error) {
       window.alert(`تعذّر حذف هذا ${section.singularLabel}.`);
       return;
+    }
+
+    // بعد حذف السجل فقط: حذف ملفه الصوتي إن كان من ملفاتنا ولا تستخدمه حلقة أخرى
+    if (audioField) {
+      for (const row of deleted ?? []) {
+        const url = row[audioField.name];
+        if (typeof url === "string" && url) {
+          await deleteStoredAudioIfUnused(supabase, url, section.table, audioField.name);
+        }
+      }
     }
 
     setRows((prev) => prev.filter((row) => row.id !== id));
